@@ -594,7 +594,68 @@ template void doTask(NCProd<IQIndex>&,QDense<Cplx> const&,QDense<Real> const&,Ma
 template void doTask(NCProd<IQIndex>&,QDense<Real> const&,QDense<Cplx> const&,ManageStore&);
 template void doTask(NCProd<IQIndex>&,QDense<Cplx> const&,QDense<Cplx> const&,ManageStore&);
 
+template<typename TA, typename TB>
+void
+cprElmts(IsEql<IQIndex>& P,
+         QDense<TA> const& A,
+         QDense<TB> const& B,
+         ManageStore& m)
+    {
+    if(isTrivial(P.perm()) && std::is_same<TA,TB>::value)
+        {
+        auto dA = realData(A);
+        auto dB = realData(B);
+        for (int i = 0; i < dA.size(); ++i)
+            if (dA.data()[i] != dB.data()[i]) { P.Result = false; return; }
+        }
+    else
+        {
+        auto r = P.Lis().r();
+        Labels Ablock(r,0),
+              Bblock(r,0);
+        Range Arange,
+              Brange;
+        for(auto& aio : A.offsets)
+            {
+            computeBlockInd(aio.block,P.Lis(),Ablock);
+            for(int i = 0; i < r; ++i)
+                Bblock[i] = Ablock[P.perm().dest(i)];
+            Arange.init(make_indexdim(P.Lis(),Ablock));
+            Brange.init(make_indexdim(P.Ris(),Bblock));
+ 
+            auto aref = makeTenRef(A.data(),aio.offset,A.size(),&Arange);
+            auto bblock = getBlock(B,P.Ris(),Bblock);
+            auto bref = makeRef(bblock,&Brange);
+            auto brefPerm = permute(bref,P.perm());
+ 
+            if (aref.store().size() != brefPerm.store().size()) { P.Result = false; return; }
+            for (int i = 0; i < aref.store().size(); ++i)
+                if (aref.data()[i] != brefPerm.data()[i]) { P.Result = false; return; }
+            }
+        }
+ 
+    P.Result = true;
+    }
+ 
+template<typename TA, typename TB>
+void
+doTask(IsEql<IQIndex>& P,
+       QDense<TA> const& A,
+       QDense<TB> const& B,
+       ManageStore& m)
+    {
+    if((isReal(A) && isReal(B)) || (isCplx(A) && isCplx(B)) )
+        cprElmts(P, A, B, m);
+    else
+        P.Result = false; 
+    }
+ 
+template void doTask(IsEql<IQIndex>&,QDense<Real> const&,QDense<Real> const&,ManageStore&);
+template void doTask(IsEql<IQIndex>&,QDense<Cplx> const&,QDense<Real> const&,ManageStore&);
+template void doTask(IsEql<IQIndex>&,QDense<Real> const&,QDense<Cplx> const&,ManageStore&);
+template void doTask(IsEql<IQIndex>&,QDense<Cplx> const&,QDense<Cplx> const&,ManageStore&);
 
+    
 
 } //namespace itensor
 

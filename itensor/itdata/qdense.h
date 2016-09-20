@@ -320,7 +320,12 @@ doTask(NCProd<IQIndex>& P,
        QDense<VB> const& B,
        ManageStore& m);
 
-
+template<typename VA, typename VB>
+void
+doTask(IsEql<IQIndex>& P,
+       QDense<VA> const& A,
+       QDense<VB> const& B,
+       ManageStore& m);
 
 // Does a binary search over offsets to see 
 // if they contain "blockind"

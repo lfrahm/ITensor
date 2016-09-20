@@ -88,6 +88,29 @@ checkSameDiv(IQTensor const& T1,
         }
     }
 
+bool
+checkIndexSets(IndexSet const& is1,
+               IndexSet const& is2)
+    {
+    if (is1.r() != is2.r()) { return false; } 
+    for (auto& I: is1) 
+        if ( findindex(is2, I) == -1 ) { return false; }        
+    return true;
+    }
+
+bool
+checkIndexSets(IQIndexSet const& is1,
+               IQIndexSet const& is2)
+    {
+    if (is1.r() != is2.r()) { return false; } 
+    for (auto& I: is1) 
+        {
+        auto idx = findindex(is2, I);
+        if ( idx == -1 || I.dir() != is2[idx].dir() ) { return false; }        
+        }
+    return true;
+    }
+
 } //namespace detail
 
 
@@ -236,5 +259,28 @@ operator+=(ITensorT const& R)
 template ITensorT<Index>& ITensorT<Index>::operator+=(ITensorT<Index> const& R);
 template ITensorT<IQIndex>& ITensorT<IQIndex>::operator+=(ITensorT<IQIndex> const& R);
 
+template<typename IndexT> 
+bool ITensorT<IndexT>::
+operator==(ITensorT const& R)
+    {
+    auto& L = *this;
+    if(!L && !R) { return true; }
+    if(!L != !R) { return false; }
+    if (!detail::checkIndexSets(L.inds(), R.inds())) { return false; }
+    return true;
+     
+    using permutation = typename IsEql<index_type>::permutation;
+ 
+    auto P = permutation(L.inds().size());
+    calcPerm(R.inds(),L.inds(),P);
+ 
+    auto C = doTask(IsEql<index_type>{P, L.inds(),R.inds()},
+                L.store(),
+                R.store());
+ 
+    return C.Result;
+    } 
+template bool ITensorT<Index>::operator==(ITensorT<Index> const& R);
+template bool ITensorT<IQIndex>::operator==(ITensorT<IQIndex> const& R);
 
 } //namespace itensor

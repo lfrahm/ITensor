@@ -407,6 +407,45 @@ template<typename I>
 const char*
 typeNameOf(NCProd<I> const&) { return "NCProd"; }
 
+//Non-contracting product
+template<typename IndexT>
+struct IsEql
+    {
+    using permutation = Permutation;
+    using index_type = IndexT;
+    using iset_type = IndexSetT<index_type>;
+    private:
+    const Permutation *perm_ = nullptr;
+    const iset_type *Lis_ = nullptr,
+                    *Ris_ = nullptr;
+    public:
+ 
+    bool Result;
+ 
+    IsEql(Permutation const& P,
+          iset_type const& Lis,
+          iset_type const& Ris) :
+        perm_(&P),
+        Lis_(&Lis),
+        Ris_(&Ris)
+        { }
+ 
+    Permutation const&
+    perm() const { return *perm_; }
+ 
+    iset_type const&
+    Lis() const { return *Lis_; }
+ 
+    iset_type const&
+    Ris() const { return *Ris_; }
+ 
+ 
+    };
+ 
+template<typename I>
+const char*
+typeNameOf(IsEql<I> const&) { return "IsEql"; }
+
 struct StorageType
     {
     enum Type

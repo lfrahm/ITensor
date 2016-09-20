@@ -233,6 +233,9 @@ class ITensorT
     ITensorT&
     operator/=(ITensorT const& other);
 
+    // Comparison 
+    bool
+    operator==(ITensorT const& other);
 
     //
     // Developer / advanced methods
