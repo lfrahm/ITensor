@@ -267,7 +267,6 @@ operator==(ITensorT const& R)
     if(!L && !R) { return true; }
     if(!L != !R) { return false; }
     if (!detail::checkIndexSets(L.inds(), R.inds())) { return false; }
-    return true;
      
     using permutation = typename IsEql<index_type>::permutation;
  
