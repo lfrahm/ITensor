@@ -28,6 +28,7 @@
 #include "itensor/mps/tevol.h"
 #include "itensor/mps/hambuilder.h"
 #include "itensor/mps/autompo.h"
+#include "itensor/mps/chmstrympo.h"
 
 #include "itensor/mps/lattice/square.h"
 #include "itensor/mps/lattice/triangular.h"

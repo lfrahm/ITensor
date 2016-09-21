@@ -40,6 +40,7 @@ SOURCES+= mps/mpsalgs.cc
 SOURCES+= mps/mpo.cc 
 SOURCES+= mps/mpoalgs.cc 
 SOURCES+= mps/autompo.cc
+SOURCES+= mps/chmstrympo.cc
 
 ####################################
 
