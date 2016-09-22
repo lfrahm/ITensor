@@ -22,7 +22,7 @@ std::ostream&
 operator<<(std::ostream& s, const OneBodyInt& a)
     {
     s << "  (" << a.i << "," << a.j << ") " << a.coef << "\n";
-    return s;        
+    return s;       
     }
 
 bool 
@@ -481,14 +481,31 @@ toMPOImpl(ChmstryMPO const& am,
           Args const& args)
     {
 
-    using IndexT = typename Tensor::index_type;
-    auto checkqn = args.getBool("CheckQN",true);
+    // using IndexT = typename Tensor::index_type;
+    // auto checkqn = args.getBool("CheckQN",true);
 
     auto const& sites = am.sites();
     auto H = MPOt<Tensor>(sites);
-    auto N = sites.N();
+    // auto N = sites.N();
 
+    auto parity1 = (sites.op("F",1));
+    auto theLink = findtype(H.A(1), Link);
+    H.Anc(1) = multSiteOps(sites.op("Cdagup", 1), parity1) * setElt(theLink(1));
 
+    auto indexLeft = dag(commonIndex(H.A(1), H.A(2)));
+    auto indexRight = commonIndex(H.A(2), H.A(3));
+    H.Anc(2) = sites.op("Cup", 2) * setElt(indexLeft(1)) * setElt(indexRight(1));
+
+    auto S2 = MPOt<Tensor>(sites);
+    theLink = findtype(S2.A(1), Link);
+    S2.Anc(1) = multSiteOps(parity1, sites.op("Cdagup", 1)) * setElt(theLink(1));
+
+    indexLeft = dag(commonIndex(S2.A(1), S2.A(2)));
+    indexRight = commonIndex(S2.A(2), S2.A(3));
+    S2.Anc(2) = prime(sites.op("Cdagup", 2)) * setElt(indexLeft(1)) * setElt(indexRight(1));
+    std::cout << "bla" << std::endl;
+
+    // H.plusEq(S2, {"Maxm",500,"Cutoff",1E-9});
 
 //     for(auto& t : am.terms())
 //     if(t.Nops() > 2) 
