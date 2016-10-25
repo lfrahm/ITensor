@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "itensor/util/print_macro.h"
 #include "itensor/mps/chmstrympo.h"
+#include "itensor/mps/autompo.h"
 
 // using std::find;
 // using std::cout;
@@ -40,15 +41,8 @@ OneBodyInt::proportialTo(const OneBodyInt& other) const
 bool
 OneBodyInt::adjointOf(const OneBodyInt& other) const
     {
-    return (i == other.j && j == other.i && coef == conj(other.coef));    
+    return (i == other.j && j == other.i && abs(coef - conj(other.coef)) < 1E-12);    
     }
-
-
-bool
-isReal(const Cplx& z) { return z.imag() == 0; }
-
-bool
-isApproxReal(const Cplx& z, Real epsilon = 1E-12) { return std::fabs(z.imag()) < epsilon; }
 
 OneBodyInt::
 OneBodyInt(int i_,
@@ -60,14 +54,72 @@ OneBodyInt(int i_,
     coef(coef_)
     { }
 
+std::ostream& 
+operator<<(std::ostream& s, const TwoBodyInt& a)
+    {
+    s << "  (" << a.i << "," << a.j << "," << a.k << "," << a.l <<") " << a.coef << "\n";
+    return s;       
+    }
+
+bool 
+TwoBodyInt::operator==(const TwoBodyInt& other) const
+    {
+    return (i == other.i && j == other.j && k == other.k && l == other.l && abs(coef-other.coef) < 1E-12);
+    }
+
+bool 
+TwoBodyInt::proportialTo(const TwoBodyInt& other) const
+    {
+    return (i == other.i && j == other.j && k == other.k && l == other.l);
+    }
+
 bool
-isHermitian(const std::vector<OneBodyInt> a)
+TwoBodyInt::adjointOf(const TwoBodyInt& other) const
+    {
+    return (i == other.k && j == other.l && k == other.i && l == other.j && abs(coef - conj(other.coef)) < 1E-12);
+    }
+
+bool
+TwoBodyInt::similarTo(const TwoBodyInt& other) const
+    {
+    return (i == other.j && j == other.i && k == other.l && l == other.k && abs(coef - other.coef) < 1E-12);
+    }
+
+TwoBodyInt::
+TwoBodyInt(int i_,
+           int j_,
+           int k_,
+           int l_,
+           Cplx coef_)
+    :
+    i(i_),
+    j(j_),
+    k(k_),
+    l(l_),
+    coef(coef_)
+    { }
+
+
+bool
+isHermitian(const std::vector<OneBodyInt> a, const std::vector<TwoBodyInt> b)
     {
     for (auto& I: a)
         {
         auto u = std::find_if(a.begin(), a.end(),
         [=](const OneBodyInt& l){ return l.adjointOf(I); });        
-        if (u == a.end() && !I.adjointOf(*u)) { return false; }
+        if (u == a.end()) { return false; }
+        }
+    for (auto& I: b)
+        {
+        auto u = std::find_if(b.begin(), b.end(),
+        [=](const TwoBodyInt& l){ return l.adjointOf(I); });        
+        if (u == b.end()) { return false; }
+        }
+    for (auto& I: b)
+        {
+        auto u = std::find_if(b.begin(), b.end(),
+        [=](const TwoBodyInt& l){ return l.similarTo(I); });        
+        if (u == b.end()) { return false; }
         }
     return true;
     }
@@ -476,6 +528,39 @@ isHermitian(const std::vector<OneBodyInt> a)
 //     }
 
 template<typename Tensor>
+void
+insertAt(MPOt<Tensor>& T,
+         IQTensor const& op, 
+         int const i)
+    {
+    if (i == 1)
+        T.Anc(i) = op * setElt(rightLinkInd(T, i)(1));
+    else if (i == T.N())
+        T.Anc(i) = op * setElt(leftLinkInd(T, i)(1));
+    else
+        T.Anc(i) = op * setElt(rightLinkInd(T, i)(1)) * setElt(leftLinkInd(T, i)(1));
+    }
+
+template<typename Tensor>
+MPOt<Tensor> 
+constructMPOAddend(SiteSet const& sites,
+                   std::vector<IQTensor>& TI,
+                   std::vector<IQTensor>& TJ,
+                   std::vector<IQTensor>& TK,
+                   std::vector<IQTensor>& TL)
+    {
+    MPOt<Tensor> result(sites);
+
+    for (int i = 1; i <= sites.N(); ++i)
+        {
+        auto op = multSiteOps(multSiteOps(TI.at(i-1), TJ.at(i-1)), multSiteOps(TK.at(i-1), TL.at(i-1)));
+        insertAt(result, op, i);
+        }
+
+    return result;
+    }
+
+template<typename Tensor>
 MPOt<Tensor>
 toMPOImpl(ChmstryMPO const& am,
           Args const& args)
@@ -486,282 +571,76 @@ toMPOImpl(ChmstryMPO const& am,
 
     auto const& sites = am.sites();
     auto H = MPOt<Tensor>(sites);
-    // auto N = sites.N();
+    auto N = sites.N();
+    for (int i = 1; i <= N; ++i) { H.Anc(i).fill(0.0); };
 
-    auto parity1 = (sites.op("F",1));
-    auto theLink = findtype(H.A(1), Link);
-    H.Anc(1) = multSiteOps(sites.op("Cdagup", 1), parity1) * setElt(theLink(1));
+    std::vector<std::string> sigma;
+    sigma.push_back("up");
+    sigma.push_back("dn");
 
-    auto indexLeft = dag(commonIndex(H.A(1), H.A(2)));
-    auto indexRight = commonIndex(H.A(2), H.A(3));
-    H.Anc(2) = sites.op("Cup", 2) * setElt(indexLeft(1)) * setElt(indexRight(1));
+    for (auto I: am.oneBodyTerms())
+        {
+        for (auto s: sigma)
+            {
+            auto T = MPOt<Tensor>(sites);
+            if (I.i == I.j)
+                insertAt(T, I.coef * sites.op("N"+s, I.i), I.i);
+            else if (I.i < I.j)
+                {
+                insertAt(T, I.coef * multSiteOps(sites.op("Cdag"+s, I.i), sites.op("F",I.i)), I.i);
+                for (int i = I.i+1; i < I.j; ++i) { insertAt(T, sites.op("F", i), i); }
+                insertAt(T, sites.op("C"+s, I.j), I.j);
+                }
+            else if (I.i > I.j)
+                {
+                insertAt(T, I.coef * multSiteOps(sites.op("F",I.j), sites.op("C"+s, I.j)), I.j);
+                for (int i = I.j+1; i < I.i; ++i) { insertAt(T, sites.op("F", i), i); }
+                insertAt(T, sites.op("Cdag"+s, I.i), I.i);
+                }
+            H.plusEq(T, {"Maxm",500,"Cutoff",1E-9});     
+            }
+        }
 
-    auto S2 = MPOt<Tensor>(sites);
-    theLink = findtype(S2.A(1), Link);
-    S2.Anc(1) = multSiteOps(parity1, sites.op("Cdagup", 1)) * setElt(theLink(1));
+    for (auto I: am.twoBodyTerms())
+        {
+        for (auto s: sigma)
+            {
+            for (auto sP: sigma)
+                {
+                std::vector<IQTensor> TI;
+                std::vector<IQTensor> TJ;
+                std::vector<IQTensor> TK;
+                std::vector<IQTensor> TL;
 
-    indexLeft = dag(commonIndex(S2.A(1), S2.A(2)));
-    indexRight = commonIndex(S2.A(2), S2.A(3));
-    S2.Anc(2) = prime(sites.op("Cdagup", 2)) * setElt(indexLeft(1)) * setElt(indexRight(1));
-    std::cout << "bla" << std::endl;
+                    // i
+                    {
+                    for (int i = 1; i < I.i; ++i) { TI.push_back(sites.op("F", i)); }
+                    TI.push_back(sites.op("Cdag"+s, I.i));
+                    for (int i = I.i+1; i <= N; ++i) { TI.push_back(sites.op("Id", i)); }
+                    }
+                    // j
+                    {
+                    for (int i = 1; i < I.j; ++i) { TJ.push_back(sites.op("F", i)); }
+                    TJ.push_back(sites.op("Cdag"+sP, I.j));
+                    for (int i = I.j+1; i <= N; ++i) { TJ.push_back(sites.op("Id", i)); }
+                    }
+                    // k
+                    {
+                    for (int i = 1; i < I.k; ++i) { TK.push_back(sites.op("F", i)); }
+                    TK.push_back(sites.op("C"+sP, I.k));
+                    for (int i = I.k+1; i <= N; ++i) { TK.push_back(sites.op("Id", i)); }
+                    }
+                    // l
+                    {
+                    for (int i = 1; i < I.l; ++i) { TL.push_back(sites.op("F", i)); }
+                    TL.push_back(sites.op("C"+s, I.l));
+                    for (int i = I.l+1; i <= N; ++i) { TL.push_back(sites.op("Id", i)); }
+                    }
 
-    // H.plusEq(S2, {"Maxm",500,"Cutoff",1E-9});
-
-//     for(auto& t : am.terms())
-//     if(t.Nops() > 2) 
-//         {
-//         Error("Only at most 2-operator terms allowed for AutoMPO conversion to MPO/IQMPO");
-//         }
-
-//     //Special SiteTerm objects indicating either
-//     //a string of identities coming from the first
-//     //site of the system or the completed Hamitonian
-//     //for the left-hand side of the system
-//     SiteTerm IL("IL",0),
-//              HL("HL",0);
-
-//     vector<vector<SiteQN>> basis(N+1);
-//     for(int n = 0; n < N; ++n)
-//         basis.at(n).emplace_back(IL,QN());
-//     for(int n = 1; n <= N; ++n)
-//         basis.at(n).emplace_back(HL,QN());
-
-//     const QN Zero;
-
-//     //Fill up the basis array at each site with 
-//     //the unique operator types occurring on the site
-//     //(unique including their coefficient)
-//     //and starting a string of operators (i.e. first op of an HTerm)
-//     for(auto& ht : am.terms())
-//     for(auto n : range(ht.first().i,ht.last().i))
-//         {
-//         auto& bn = basis.at(n);
-//         auto test_has_first = [&ht](SiteQN const& sq){ return sq.st == ht.first(); };
-//         bool has_first = (stdx::find_if(bn,test_has_first) != bn.end());
-//         if(!has_first) 
-//             {
-//             auto Op = sites.op(ht.first().op,ht.first().i);
-//             if(checkqn)
-//                 {
-//                 bn.emplace_back(ht.first(),-div(Op));
-//                 }
-//             else
-//                 {
-//                 bn.emplace_back(ht.first(),Zero);
-//                 }
-//             }
-//         }
-
-//     if(checkqn)
-//         {
-//         auto qn_comp = [&Zero](const SiteQN& sq1,const SiteQN& sq2)
-//                        {
-//                        //First two if statements are to artificially make
-//                        //the default-constructed Zero QN come first in the sort
-//                        if(sq1.q == Zero && sq2.q != Zero) return true;
-//                        else if(sq2.q == Zero && sq1.q != Zero) return false;
-//                        return sq1.q < sq2.q;
-//                        };
-//         //Sort bond "basis" elements by quantum number sector:
-//         for(auto& bn : basis) std::sort(bn.begin(),bn.end(),qn_comp);
-//         }
-
-//     auto links = vector<IndexT>(N+1);
-//     vector<IndexQN> inqn;
-//     for(int n = 0; n <= N; ++n)
-//         {
-//         auto& bn = basis.at(n);
-//         inqn.clear();
-//         QN currq = bn.front().q;
-//         int currm = 0;
-//         int count = 0;
-//         for(auto& sq : bn)
-//             {
-//             if(sq.q == currq)
-//                 {
-//                 ++currm;
-//                 }
-//             else
-//                 {
-//                 inqn.emplace_back(Index(format("hl%d_%d",n,count++),currm),currq);
-//                 currq = sq.q;
-//                 currm = 1;
-//                 }
-//             }
-//         inqn.emplace_back(Index(format("hl%d_%d",n,count++),currm),currq);
-
-//         links.at(n) = IQIndex(nameint("Hl",n),std::move(inqn));
-
-//         //if(n <= 2 or n == N)
-//         //    {
-//         //    println("basis for site ",n);
-//         //    for(size_t l = 0; l < bn.size(); ++l) printfln("%d %s %s",l,bn.at(l).st,bn.at(l).q);
-//         //    println();
-//         //    printfln("IQIndex for site %d:\n%s",n,links.at(n));
-//         //    }
-//         }
-
-// #ifdef SHOW_AUTOMPO
-//     static string ws[100][100];
-// #endif
-
-//     //Create arrays indexed by lattice sites.
-//     //For lattice site "j", ht_by_n[j] contains
-//     //all HTerms (operator strings) which begin on,
-//     //end on, or cross site "j"
-//     vector<vector<HTerm>> ht_by_n(N+1);
-//     for(auto& ht : am.terms()) 
-//     for(auto& st : ht.ops)
-//         {
-//         ht_by_n.at(st.i).push_back(ht);
-//         }
-
-//     for(auto n : range1(N))
-//         {
-//         auto& bn1 = basis.at(n-1);
-//         auto& bn  = basis.at(n);
-
-//         auto& W = H.Anc(n);
-//         auto &row = links.at(n-1),
-//              &col = links.at(n);
-
-//         W = Tensor(dag(sites(n)),prime(sites(n)),dag(row),col);
-
-//         for(auto r : range(row.m()))
-//         for(auto c : range(col.m()))
-//             {
-//             auto& rst = bn1.at(r).st;
-//             auto& cst = bn.at(c).st;
-
-
-// #ifdef SHOW_AUTOMPO
-//             ws[r][c] = "0";
-// #endif
-//             auto rc = setElt(dag(row)(r+1)) * setElt(col(c+1));
-
-//             //Start a new operator string
-//             if(cst.i == n && rst == IL)
-//                 {
-//                 //Call startTerm to handle fermionic cases with Jordan-Wigner strings
-//                 auto op = startTerm(cst.op);
-//                 //if(Global::debug1())
-//                 //    {
-//                 //    println("\nAttempting to add the following");
-//                 //    PrintData(sites.op(op,n));
-//                 //    printfln("cst.coef = %f",cst.coef);
-//                 //    PrintData(cst.coef * sites.op(op,n));
-//                 //    auto tmp = cst.coef * sites.op(op,n) * rc;
-//                 //    PrintData(tmp);
-//                 //    PrintData(W);
-//                 //    EXIT
-//                 //    }
-//                 W += cst.coef * sites.op(op,n) * rc;
-// #ifdef SHOW_AUTOMPO
-//                 if(isApproxReal(cst.coef))
-//                     ws[r][c] = format("%.2f %s",cst.coef.real(),op);
-//                 else
-//                     ws[r][c] = format("%.2f %s",cst.coef,op);
-// #endif
-//                 }
-
-//             //Add identity "string" connecting operator
-//             //strings of more than two sites in length
-//             if(cst == rst)
-//                 {
-//                 /*
-//                 int found = 0;
-//                 for(const auto& ht : ht_by_n.at(n))
-//                     {
-//                     if(ht.first() == rst &&
-//                        ht.first().i != n && 
-//                        ht.last().i  != n)
-//                         {
-//                         for(const auto& st : ht.ops)
-//                         if(st.i == n)
-//                             {
-//                             found += 1;
-// #ifdef SHOW_AUTOMPO
-//                             ws[r][c] = format("%.2f %s",st.coef,st.op);
-// #endif
-//                             W += st.coef * sites.op(st.op,n) * rc;
-//                             }
-//                         }
-//                     }
-//                 //if(found == 0)
-//                     */
-
-//                 if(isFermionic(cst))
-//                     W += sites.op("F",n) * rc;
-//                 else
-//                     W += sites.op("Id",n) * rc;
-// #ifdef SHOW_AUTOMPO
-//                 if(isFermionic(cst)) ws[r][c] = "F";
-//                 else                 ws[r][c] = "1";
-// #endif
-//                 //if(found > 1)
-//                 //    {
-//                 //    println("Warning: found > 1 at site ",n);
-//                 //    PAUSE
-//                 //    }
-//                 }
-
-//             //End operator strings
-//             if(cst == HL)
-//                 {
-//                 //Check if operator is an ending operator
-//                 for(const auto& ht : ht_by_n.at(n))
-//                 if(rst == ht.first() && ht.last().i == n)
-//                     {
-//                     auto op = endTerm(ht.last().op);
-//                     W += ht.last().coef * sites.op(op,n) * rc;
-// #ifdef SHOW_AUTOMPO
-//                     ws[r][c] = op;
-//                     auto coef = ht.last().coef;
-//                     if(isApproxReal(coef))
-//                         ws[r][c] = format("%.2f %s",coef.real(),op);
-//                     else
-//                         ws[r][c] = format("%.2f %s",coef,op);
-// #endif
-//                     }
-//                 }
-
-//             //Include on-site operators
-//             if(rst == IL && cst == HL)
-//                 {
-//                 for(const auto& ht : ht_by_n.at(n))
-//                 if(ht.first().i == ht.last().i)
-//                     {
-// #ifdef SHOW_AUTOMPO
-//                     if(isApproxReal(ht.first().coef))
-//                         ws[r][c] = format("%.2f %s",ht.first().coef.real(),ht.first().op);
-//                     else
-//                         ws[r][c] = format("%.2f %s",ht.first().coef,ht.first().op);
-// #endif
-//                     W += ht.first().coef * sites.op(ht.first().op,n) * rc;
-//                     }
-//                 }
-
-//             }
-
-// #ifdef SHOW_AUTOMPO
-//         if(n <= 10 or n == N)
-//             {
-//             for(int r = 0; r < row.m(); ++r, println())
-//             for(int c = 0; c < col.m(); ++c)
-//                 {
-//                 print(ws[r][c],"\t");
-//                 if(ws[r][c].length() < 8 && c == 1) 
-//                 print("\t");
-//                 }
-//             println("=========================================");
-//             }
-// #endif
-//         }
-
-//     H.Anc(1) *= setElt(links.at(0)(1));
-//     H.Anc(N) *= setElt(dag(links.at(N))(1));
-
-    //checkQNs(H);
+                H.plusEq(constructMPOAddend<Tensor>(sites, TI, TJ, TK, TL),{"Maxm",500,"Cutoff",1E-9});
+                }
+            }
+        }
 
     return H;
     }
@@ -1062,11 +941,12 @@ std::ostream&
 operator<<(std::ostream& s, const ChmstryMPO& a)
     {
     s << "ChmstryMPO:\n";
-    s << "Number of orbitals:" << a.sites().N() << "\n";
+    s << "Number of orbitals: " << a.sites().N() << "\n";
     s << "One body integrals:\n";
-    for(const auto& t : a.terms()) s << t;
-    s << "Is hermitian: " << isHermitian(a.terms()) << "\n"; 
-
+    for(const auto& t : a.oneBodyTerms()) s << t;
+    s << "Two body integrals:\n";
+    for(const auto& t : a.twoBodyTerms()) s << t;
+    s << "Is hermitian: " << isHermitian(a.oneBodyTerms(), a.twoBodyTerms()) << "\n"; 
     return s;
     }
 

@@ -152,7 +152,7 @@ davidson(BigMatrixT const& A,
             //Calculate residual q
             q = AV[0] - lambda*V[0];
             //printfln("ii=%d, q = \n%f",ii,q);
-            }
+            } 
         else // ii != 0
             {
             Mref *= -1;
@@ -280,11 +280,15 @@ davidson(BigMatrixT const& A,
             auto qnrm = norm(q);
             if(qnrm < 1E-10)
                 {
+                printf("abcd\n");
                 //Orthogonalization failure,
                 //try randomizing
                 if(debug_level_ >= 2) println("Vector not independent, randomizing");
-                q = V.at(ni-1);
-                randomize(q);
+                // q = V.at(ni-1);
+                // randomize(q);
+                auto setOne = [](Real r) { return (r!=0) ? 1.0 : 0.0; };
+
+                q.apply(setOne);
                 qnrm = norm(q);
                 //Do another orthog pass
                 --pass;

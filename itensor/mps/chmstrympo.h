@@ -68,7 +68,7 @@ struct OneBodyInt
     operator!=(const OneBodyInt& other) const { return !operator==(other); }
 
     bool 
-    operator<(const OneBodyInt& other) const { return (i < other.i || j < other.j); }
+    operator<(const OneBodyInt& other) const { return (i < other.i || (i == other.i && j < other.j)); }
 
     bool
     proportialTo(const OneBodyInt& other) const;
@@ -78,10 +78,51 @@ struct OneBodyInt
 
     };
 
+struct TwoBodyInt
+    {
+    int i;
+    int j;
+    int k;
+    int l;
+
+    Cplx coef;
+
+    TwoBodyInt(int i,
+               int j,
+               int k,
+               int l,
+               Cplx coef = 1);
+
+
+    bool
+    operator==(const TwoBodyInt& other) const;
+
+    bool
+    operator!=(const TwoBodyInt& other) const { return !operator==(other); }
+
+    bool 
+    operator<(const TwoBodyInt& other) const { return (i < other.i ||
+                                                      (i == other.i && j < other.j) || 
+                                                      (i == other.i && j == other.j && k < other.k)  ||
+                                                      (i == other.i && j == other.j && k == other.k && l < other.l)); 
+                                                 }
+
+    bool
+    proportialTo(const TwoBodyInt& other) const;
+
+    bool
+    adjointOf(const TwoBodyInt& other) const;
+
+    bool
+    similarTo(const TwoBodyInt& other) const;
+
+    };
+
 class ChmstryMPO
     {
     SiteSet sites_;
-    std::vector<OneBodyInt> terms_;
+    std::vector<OneBodyInt> oneBodyTerms_;
+    std::vector<TwoBodyInt> twoBodyTerms_;
 
     public:
 
@@ -93,7 +134,10 @@ class ChmstryMPO
     sites() const { return sites_; }
 
     std::vector<OneBodyInt> const&
-    terms() const { return terms_; }
+    oneBodyTerms() const { return oneBodyTerms_; }
+
+    std::vector<TwoBodyInt> const&
+    twoBodyTerms() const { return twoBodyTerms_; }
 
     operator MPO() const { return toMPO<ITensor>(*this); }
 
@@ -102,20 +146,33 @@ class ChmstryMPO
     void
     add(OneBodyInt t) 
         { 
-        if(abs(t.coef) != 0) 
+        if(abs(t.coef) > 1E-12) 
             {
-            terms_.push_back(t); 
-            std::sort(terms_.begin(), terms_.end());
+            oneBodyTerms_.push_back(t); 
+            std::sort(oneBodyTerms_.begin(), oneBodyTerms_.end());
             }
         }
 
     void
-    reset() { terms_.clear(); }
+    add(TwoBodyInt t) 
+        { 
+        if(abs(t.coef) > 1E-12) 
+            {
+            twoBodyTerms_.push_back(t); 
+            std::sort(twoBodyTerms_.begin(), twoBodyTerms_.end());
+            }
+        }
+
+    void
+    reset() { oneBodyTerms_.clear(); twoBodyTerms_.clear(); }
 
     };
 
 std::ostream& 
 operator<<(std::ostream& s, const OneBodyInt& a);
+
+std::ostream& 
+operator<<(std::ostream& s, const TwoBodyInt& a);
 
 std::ostream& 
 operator<<(std::ostream& s, const ChmstryMPO& a);
