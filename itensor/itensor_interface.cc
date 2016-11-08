@@ -144,3 +144,4 @@ template ITensorT<Index> multSiteOps(ITensorT<Index> A, ITensorT<Index> const& B
 template ITensorT<IQIndex> multSiteOps(ITensorT<IQIndex> A, ITensorT<IQIndex> const& B);
 
 } //namespace itensor
+
