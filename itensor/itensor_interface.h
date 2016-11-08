@@ -95,6 +95,79 @@ class ITensorT
     indexset_type const&
     inds() const { return is_; }
 
+//simple comparison via |C|=|A-B|< threshhold => equal
+	//will return whether ITensor A is equal to ITensor B
+	bool equals(ITensorT B, Real threshhold=pow(10,-10)){
+		bool q = this->store();
+		bool w = B.store();
+		if(!q || !w) return false;
+		//are the tensors of the same rank?
+		if(r()!=B.r()) return false;
+		//are the indices the same?
+		for(auto& i : inds()){
+			if(findindex(B.inds(), i)==-1){
+				return false;
+			}
+		}
+		ITensorT C = B - *this;
+		return norm(C)<threshhold;
+	}
+
+	//Usage is deprecated in most cases as th equals_simple function will return more quickly.
+	//Only for big ITensors where differences might occur for small indices, this function might be useful
+	////will return whether ITensor A is equal to ITensor B
+	//comparison, the Real threshhold is the smallest difference between the tensor a and tensor b at any index for which A.equals_rec(B) will return false
+	//|A_{i,j,k,...}|-|B_{i,j,k...}|> threshhold => equals will return false
+
+	bool equals_rec(ITensorT B, Real threshhold = pow(10,-10)){
+		bool q = this->store();
+		bool w = B.store();
+		if(!q || !w) return false;
+		//are the tensors of the same rank?
+		if(r()!=B.r()) return false;
+		//are the indices the same?
+		for(auto& i : inds()){
+			if(findindex(B.inds(), i)==-1){
+				return false;
+			}
+		}
+		std::vector<int> pos;
+		std::vector<Index> indices;
+		for(Index i: inds()){
+			pos.push_back(1);
+			indices.push_back(i);
+		}
+		//to speed up this function, indices[n] is used instead of indices.at(n). indices[n] won't check vor valid index n which could prove usefull for very large tensors
+		return rec_compare(B, threshhold,pos,indices,indices[0]);
+	}
+
+	bool rec_compare(ITensorT B, Real threshhold, std::vector<int> pos, std::vector<Index> indices, Index index){
+		int indpos = 0;
+		for (int i = 0;i<=indices.size()-1;i++){
+			if(indices[i].id()==index.id()){
+				indpos = i;
+				break;
+			}
+		}
+
+		bool last = indpos==indices.size()-1;
+		while(pos[indpos]<=index.m()){
+			if(!last){
+				if(rec_compare(B, threshhold,pos,indices,indices[indpos+1])==false) return false;
+			}
+			ITensorT a = *this;
+			ITensorT b = B;
+			for(int h=0;h<indices.size();++h){
+				a = a * IndexVal(indices[h], pos[h]);
+				b = b * IndexVal(indices[h], pos[h]);
+			}
+			if(abs(a.cplx()-b.cplx())>threshhold) return false;
+			pos[indpos]= pos[indpos]+1;
+		}
+		return true;
+	}
+
+
     //evaluates to false if default constructed
     explicit operator bool() const { return bool(is_) || bool(store_); }
 

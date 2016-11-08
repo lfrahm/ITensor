@@ -563,6 +563,29 @@ SECTION("Complex Scalar Multiply")
     }
 }
 
+SECTION("equals")
+    {
+    ITensor T = ITensor(s1,s2);
+    T.set(s1(1),s2(1),11.0);
+    T.set(s1(1),s2(2),120.1);
+    T.set(s1(2),s2(1),2.10);
+    T.set(s1(2),s2(2),2.20);
+    ITensor T2 = T;
+    CHECK(!A.equals(B));
+    CHECK(T.equals(T2));
+    }
+SECTION("equals_rec")
+    {
+    ITensor T = ITensor(s1,s2);
+    T.set(s1(1),s2(1),11.0);
+    T.set(s1(1),s2(2),120.1);
+    T.set(s1(2),s2(1),2.10);
+    T.set(s1(2),s2(2),2.20);
+    ITensor T2 = T;
+    CHECK(!A.equals_rec(B));
+    CHECK(T.equals_rec(T2));
+    }
+
 
 SECTION("Apply / Visit / Generate")
 {
