@@ -95,7 +95,7 @@ class ITensorT
     indexset_type const&
     inds() const { return is_; }
 
-//simple comparison via |C|=|A-B|< threshhold => equal
+	//simple comparison via |C|=|A-B|< threshhold => equal
 	//will return whether ITensor A is equal to ITensor B
 	bool equals(ITensorT B, Real threshhold=pow(10,-10)){
 		bool q = this->store();
@@ -306,6 +306,9 @@ class ITensorT
     ITensorT&
     operator/=(ITensorT const& other);
 
+    // Comparison 
+    bool
+    operator==(ITensorT const& other);
 
     //
     // Developer / advanced methods
@@ -547,3 +550,4 @@ operator<<(std::ostream & s, IQTensor const& T);
 
 
 #endif
+
