@@ -16,23 +16,25 @@
 // using std::pair;
 // using std::make_pair;
 
+using namespace std;
+
 namespace itensor {
 
 
-std::ostream& 
+std::ostream&
 operator<<(std::ostream& s, const OneBodyInt& a)
     {
     s << "  (" << a.i << "," << a.j << ") " << a.coef << "\n";
-    return s;       
+    return s;
     }
 
-bool 
+bool
 OneBodyInt::operator==(const OneBodyInt& other) const
     {
     return (i == other.i && j == other.j && abs(coef-other.coef) < 1E-12);
     }
 
-bool 
+bool
 OneBodyInt::proportialTo(const OneBodyInt& other) const
     {
     return (i == other.i && j == other.j);
@@ -41,7 +43,7 @@ OneBodyInt::proportialTo(const OneBodyInt& other) const
 bool
 OneBodyInt::adjointOf(const OneBodyInt& other) const
     {
-    return (i == other.j && j == other.i && abs(coef - conj(other.coef)) < 1E-12);    
+    return (i == other.j && j == other.i && abs(coef - conj(other.coef)) < 1E-12);
     }
 
 OneBodyInt::
@@ -54,20 +56,20 @@ OneBodyInt(int i_,
     coef(coef_)
     { }
 
-std::ostream& 
+std::ostream&
 operator<<(std::ostream& s, const TwoBodyInt& a)
     {
     s << "  (" << a.i << "," << a.j << "," << a.k << "," << a.l <<") " << a.coef << "\n";
-    return s;       
+    return s;
     }
 
-bool 
+bool
 TwoBodyInt::operator==(const TwoBodyInt& other) const
     {
     return (i == other.i && j == other.j && k == other.k && l == other.l && abs(coef-other.coef) < 1E-12);
     }
 
-bool 
+bool
 TwoBodyInt::proportialTo(const TwoBodyInt& other) const
     {
     return (i == other.i && j == other.j && k == other.k && l == other.l);
@@ -106,19 +108,19 @@ isHermitian(const std::vector<OneBodyInt> a, const std::vector<TwoBodyInt> b)
     for (auto& I: a)
         {
         auto u = std::find_if(a.begin(), a.end(),
-        [=](const OneBodyInt& l){ return l.adjointOf(I); });        
+        [=](const OneBodyInt& l){ return l.adjointOf(I); });
         if (u == a.end()) { return false; }
         }
     for (auto& I: b)
         {
         auto u = std::find_if(b.begin(), b.end(),
-        [=](const TwoBodyInt& l){ return l.adjointOf(I); });        
+        [=](const TwoBodyInt& l){ return l.adjointOf(I); });
         if (u == b.end()) { return false; }
         }
     for (auto& I: b)
         {
         auto u = std::find_if(b.begin(), b.end(),
-        [=](const TwoBodyInt& l){ return l.similarTo(I); });        
+        [=](const TwoBodyInt& l){ return l.similarTo(I); });
         if (u == b.end()) { return false; }
         }
     return true;
@@ -131,7 +133,7 @@ isHermitian(const std::vector<OneBodyInt> a, const std::vector<TwoBodyInt> b)
 // HTerm(const std::string& op1_,
 //       int i1_,
 //       Real x_)
-//     { 
+//     {
 //     add(op1_,i1_,x_);
 //     }
 
@@ -141,7 +143,7 @@ isHermitian(const std::vector<OneBodyInt> a, const std::vector<TwoBodyInt> b)
 //       const std::string& op2_,
 //       int i2_,
 //       Real x_)
-//     { 
+//     {
 //     add(op1_,i1_,x_);
 //     add(op2_,i2_);
 //     }
@@ -155,24 +157,24 @@ isHermitian(const std::vector<OneBodyInt> a, const std::vector<TwoBodyInt> b)
 //     }
 
 // bool HTerm::
-// startsOn(int i) const 
-//     { 
+// startsOn(int i) const
+//     {
 //     if(ops.empty()) Error("No operators in HTerm");
-//     return first().i == i; 
+//     return first().i == i;
 //     }
 
 // bool HTerm::
-// endsOn(int i) const 
-//     { 
+// endsOn(int i) const
+//     {
 //     if(ops.empty()) Error("No operators in HTerm");
-//     return last().i == i; 
+//     return last().i == i;
 //     }
 
 // bool HTerm::
-// contains(int i) const 
-//     { 
+// contains(int i) const
+//     {
 //     if(ops.empty()) Error("No operators in HTerm");
-//     return i >= first().i && i <= last().i; 
+//     return i >= first().i && i <= last().i;
 //     }
 
 // Complex HTerm::
@@ -206,7 +208,7 @@ isHermitian(const std::vector<OneBodyInt> a, const std::vector<TwoBodyInt> b)
 //     if(Nops() != other.Nops()) return false;
 
 //     for(size_t n = 0; n <= ops.size(); ++n)
-//     if(ops[n] != other.ops.at(n)) 
+//     if(ops[n] != other.ops.at(n))
 //         {
 //         return false;
 //         }
@@ -234,7 +236,7 @@ isHermitian(const std::vector<OneBodyInt> a, const std::vector<TwoBodyInt> b)
 //     //    }
 //     //println();
 
-//     //Do bubble sort: O(n^2) but allows making 
+//     //Do bubble sort: O(n^2) but allows making
 //     //pair-wise comparison for fermion signs
 //     bool did_swap = true;
 //     while(did_swap)
@@ -242,11 +244,11 @@ isHermitian(const std::vector<OneBodyInt> a, const std::vector<TwoBodyInt> b)
 //         did_swap = false;
 //         for(auto n : range(ht.ops.size()-1))
 //             {
-//             if(op(n).i == op(n+1).i) 
+//             if(op(n).i == op(n+1).i)
 //                 {
 //                 Error("AutoMPO: cannot put two operators on same site in a single term");
 //                 }
-//             if(op(n).i > op(n+1).i) 
+//             if(op(n).i > op(n+1).i)
 //                 {
 //                 std::swap(op(n),op(n+1));
 //                 did_swap = true;
@@ -267,7 +269,7 @@ isHermitian(const std::vector<OneBodyInt> a, const std::vector<TwoBodyInt> b)
 
 
 // AutoMPO::Accumulator::
-// Accumulator(AutoMPO* pa_, 
+// Accumulator(AutoMPO* pa_,
 //             Real x_)
 //     :
 //     pa(pa_),
@@ -276,7 +278,7 @@ isHermitian(const std::vector<OneBodyInt> a, const std::vector<TwoBodyInt> b)
 //     {}
 
 // AutoMPO::Accumulator::
-// Accumulator(AutoMPO* pa_, 
+// Accumulator(AutoMPO* pa_,
 //             Complex x_)
 //     :
 //     pa(pa_),
@@ -286,13 +288,13 @@ isHermitian(const std::vector<OneBodyInt> a, const std::vector<TwoBodyInt> b)
 
 // AutoMPO::Accumulator::
 // Accumulator(AutoMPO* pa_)
-//     : 
+//     :
 //     Accumulator(pa_,1)
 //     {}
 
 
 // AutoMPO::Accumulator::
-// Accumulator(AutoMPO* pa_, 
+// Accumulator(AutoMPO* pa_,
 //             const char* op_)
 //     :
 //     pa(pa_),
@@ -302,7 +304,7 @@ isHermitian(const std::vector<OneBodyInt> a, const std::vector<TwoBodyInt> b)
 //     {}
 
 // AutoMPO::Accumulator::
-// Accumulator(AutoMPO* pa_, 
+// Accumulator(AutoMPO* pa_,
 //             const std::string& op_)
 //     :
 //     pa(pa_),
@@ -319,7 +321,7 @@ isHermitian(const std::vector<OneBodyInt> a, const std::vector<TwoBodyInt> b)
 //     term *= coef;
 //     pa->add(term);
 //     }
-    
+
 
 // AutoMPO::Accumulator& AutoMPO::Accumulator::
 // operator,(Real x)
@@ -384,7 +386,7 @@ isHermitian(const std::vector<OneBodyInt> a, const std::vector<TwoBodyInt> b)
 // /*
 // MPO convention:
 // ===============
-// For each link of the MPO, define a set of bases 
+// For each link of the MPO, define a set of bases
 // that describe the terms of the Hamiltonian
 // corresponding to the left "half" of the MPO.
 // The terms include "IL", which means the product
@@ -397,25 +399,25 @@ isHermitian(const std::vector<OneBodyInt> a, const std::vector<TwoBodyInt> b)
 // The rest of the bases are each site term on the left that
 // is connected to something on the right.
 
-// So for neighbor and next neighbor, operator pair A B, 
+// So for neighbor and next neighbor, operator pair A B,
 // coefs t1 and t2, on site n, the MPO matrix is:
 // n-1             n
 //       1111   HL  11A1  111A  <== bases
-// 1111   1     0     0    A         
-// HL     0     1     0    0   
-// 11A1   0    t2 B   0    0   
-// 111A   0    t1 B   1    0   
+// 1111   1     0     0    A
+// HL     0     1     0    0
+// 11A1   0    t2 B   0    0
+// 111A   0    t1 B   1    0
 
 // For neighbor and next neighbor, operator pair A B and B A, t1 and t2
 // site n:
 // n-1             n
-//       1111  HL    11A1 11B1  111A  111B 
-// 1111   1     0     0     0     A     B  
-// HL     0     1     0     0     0     0  
-// 11A1   0    t2 B   0     0     0     0  
-// 11B1   0    t2 A   0     0     0     0  
-// 111A   0    t1 B   1     0     0     0  
-// 111B   0    t1 A   0     1     0     0  
+//       1111  HL    11A1 11B1  111A  111B
+// 1111   1     0     0     0     A     B
+// HL     0     1     0     0     0     0
+// 11A1   0    t2 B   0     0     0     0
+// 11B1   0    t2 A   0     0     0     0
+// 111A   0    t1 B   1     0     0     0
+// 111B   0    t1 A   0     1     0     0
 
 // F == fermiPhase, i.e. F = (-1)^(# of fermions of either type of spin)
 // Then we make c and cdagger both have F's going off to the left.
@@ -440,7 +442,7 @@ isHermitian(const std::vector<OneBodyInt> a, const std::vector<TwoBodyInt> b)
 
 // Cup_i Cdagup_j = (Aup_i F_i) F_{i+1} ... Adagup_j
 
-// Cdagdn_i Cdn_j  = (Adagdn_i F_i) F_{i+1} ... Fup_j Adn_j 
+// Cdagdn_i Cdn_j  = (Adagdn_i F_i) F_{i+1} ... Fup_j Adn_j
 //                 = - Adagdn_i F_{i+1} ... Fup_j Adn_j     //use Adagdn_i * F_i = -Adagdn_i
 //                 = Adagdn_i F_{i+1} ... Fup_j Fdn_j Adn_j //use Adn_j = -Fdn_j*Adn_j
 //                 = Adagdn_i F_{i+1} ... (F_j Adn_j)       //combine Fup_j*Fdn_j = F_j (definition)
@@ -477,7 +479,7 @@ isHermitian(const std::vector<OneBodyInt> a, const std::vector<TwoBodyInt> b)
 // plusAppend(std::string& s, const std::string& a)
 //     {
 //     if(s.size() == 0 || s == "0") s = a;
-//     else 
+//     else
 //         {
 //         s += "+";
 //         s += a;
@@ -530,7 +532,7 @@ isHermitian(const std::vector<OneBodyInt> a, const std::vector<TwoBodyInt> b)
 template<typename Tensor>
 void
 insertAt(MPOt<Tensor>& T,
-         IQTensor const& op, 
+         IQTensor const& op,
          int const i)
     {
     if (i == 1)
@@ -542,7 +544,7 @@ insertAt(MPOt<Tensor>& T,
     }
 
 template<typename Tensor>
-MPOt<Tensor> 
+MPOt<Tensor>
 constructMPOAddend(SiteSet const& sites,
                    std::vector<IQTensor>& TI,
                    std::vector<IQTensor>& TJ,
@@ -560,14 +562,24 @@ constructMPOAddend(SiteSet const& sites,
     return result;
     }
 
+template <typename Tensor>
+Tensor
+multTwoOps(string a, string b, int i, SiteSet const& sites)
+    {
+    return (prime(sites.op(a, i),Site)*sites.op(b, i)).mapprime(2,1,Site);
+    }
+
+template <typename Tensor>
+Tensor
+multFourOps(string a, string b, string c, string d, int i, SiteSet const& sites)
+    {
+    return (prime((prime((prime(sites.op(a, i),Site)*sites.op(b, i)).mapprime(2,1,Site),Site)*sites.op(c, i)).mapprime(2,1,Site),Site)*sites.op(d, i)).mapprime(2,1,Site);
+    }
+
 template<typename Tensor>
 MPOt<Tensor>
-toMPOImpl(ChmstryMPO const& am,
-          Args const& args)
+toMPOImpl(ChmstryMPO const& am, Args const& args)
     {
-
-    // using IndexT = typename Tensor::index_type;
-    // auto checkqn = args.getBool("CheckQN",true);
 
     auto const& sites = am.sites();
     auto H = MPOt<Tensor>(sites);
@@ -578,83 +590,118 @@ toMPOImpl(ChmstryMPO const& am,
     sigma.push_back("up");
     sigma.push_back("dn");
 
+    bool first = true;
+
     for (auto I: am.oneBodyTerms())
         {
         for (auto s: sigma)
             {
+            std::vector<string> tI;
+            std::vector<string> tJ;
+
+            // i
+            {
+            for (int i = 1; i < I.i; ++i) { tI.push_back("F"); }
+            tI.push_back("Cdag"+s);
+            for (int i = I.i+1; i <= N; ++i) { tI.push_back("Id"); }
+            }
+            // j
+            {
+            for (int i = 1; i < I.j; ++i) { tJ.push_back("F"); }
+            tJ.push_back("C"+s);
+            for (int i = I.j+1; i <= N; ++i) { tJ.push_back("Id"); }
+            }
+
             auto T = MPOt<Tensor>(sites);
-            if (I.i == I.j)
-                insertAt(T, I.coef * sites.op("N"+s, I.i), I.i);
-            else if (I.i < I.j)
+            for (int i = 1; i <= N; i++)
                 {
-                insertAt(T, I.coef * multSiteOps(sites.op("Cdag"+s, I.i), sites.op("F",I.i)), I.i);
-                for (int i = I.i+1; i < I.j; ++i) { insertAt(T, sites.op("F", i), i); }
-                insertAt(T, sites.op("C"+s, I.j), I.j);
+                T.Anc(i) = multTwoOps<Tensor>(tI[i-1], tJ[i-1], i, sites);
                 }
-            else if (I.i > I.j)
-                {
-                insertAt(T, I.coef * multSiteOps(sites.op("F",I.j), sites.op("C"+s, I.j)), I.j);
-                for (int i = I.j+1; i < I.i; ++i) { insertAt(T, sites.op("F", i), i); }
-                insertAt(T, sites.op("Cdag"+s, I.i), I.i);
-                }
-            H.plusEq(T, {"Maxm",500,"Cutoff",1E-9});     
+            putMPOLinks(T);
+            T.Anc(1) = I.coef * T.A(1);
+
+            if (first)
+            {
+              H = T;
+              first = false;
+            }
+            else
+              H.plusEq(T, args);
             }
         }
 
+    int count = 0;
     for (auto I: am.twoBodyTerms())
         {
         for (auto s: sigma)
             {
             for (auto sP: sigma)
                 {
-                std::vector<IQTensor> TI;
-                std::vector<IQTensor> TJ;
-                std::vector<IQTensor> TK;
-                std::vector<IQTensor> TL;
+                if ((I.i == I.k && s == sP) || (I.l == I.j && s == sP))
+                    continue;
 
-                    // i
-                    {
-                    for (int i = 1; i < I.i; ++i) { TI.push_back(sites.op("F", i)); }
-                    TI.push_back(sites.op("Cdag"+s, I.i));
-                    for (int i = I.i+1; i <= N; ++i) { TI.push_back(sites.op("Id", i)); }
-                    }
-                    // j
-                    {
-                    for (int i = 1; i < I.j; ++i) { TJ.push_back(sites.op("F", i)); }
-                    TJ.push_back(sites.op("Cdag"+sP, I.j));
-                    for (int i = I.j+1; i <= N; ++i) { TJ.push_back(sites.op("Id", i)); }
-                    }
-                    // k
-                    {
-                    for (int i = 1; i < I.k; ++i) { TK.push_back(sites.op("F", i)); }
-                    TK.push_back(sites.op("C"+sP, I.k));
-                    for (int i = I.k+1; i <= N; ++i) { TK.push_back(sites.op("Id", i)); }
-                    }
-                    // l
-                    {
-                    for (int i = 1; i < I.l; ++i) { TL.push_back(sites.op("F", i)); }
-                    TL.push_back(sites.op("C"+s, I.l));
-                    for (int i = I.l+1; i <= N; ++i) { TL.push_back(sites.op("Id", i)); }
-                    }
+                std::vector<string> sI;
+                std::vector<string> sJ;
+                std::vector<string> sK;
+                std::vector<string> sL;
 
-                H.plusEq(constructMPOAddend<Tensor>(sites, TI, TJ, TK, TL),{"Maxm",500,"Cutoff",1E-9});
+                // i
+                {
+                for (int i = 1; i < I.i; ++i) { sI.push_back("F"); }
+                sI.push_back("Cdag"+s);
+                for (int i = I.i+1; i <= N; ++i) { sI.push_back("Id"); }
+                }
+                // k
+                {
+                for (int i = 1; i < I.k; ++i) { sK.push_back("F"); }
+                sK.push_back("Cdag"+sP);
+                for (int i = I.k+1; i <= N; ++i) { sK.push_back("Id"); }
+                }
+                // l
+                {
+                for (int i = 1; i < I.l; ++i) { sL.push_back("F"); }
+                sL.push_back("C"+sP);
+                for (int i = I.l+1; i <= N; ++i) { sL.push_back("Id"); }
+                }
+                // j
+                {
+                for (int i = 1; i < I.j; ++i) { sJ.push_back("F"); }
+                sJ.push_back("C"+s);
+                for (int i = I.j+1; i <= N; ++i) { sJ.push_back("Id"); }
+                }
+
+                // assert(sI.size() == N);
+                assert(sI.size() == sJ.size());
+                assert(sI.size() == sK.size());
+                assert(sI.size() == sL.size());
+
+                // std::cout << sI.size() << std::endl;
+                auto T = MPOt<Tensor>(sites);
+                for (int i = 1; i <= N; i++)
+                    {
+                    T.Anc(i) = multFourOps<Tensor>(sI[i-1], sK[i-1], sL[i-1], sJ[i-1], i, sites);
+                    }
+                putMPOLinks(T);
+                T.Anc(1) = 0.5 * I.coef * T.A(1);
+
+                H.plusEq(T, args);
                 }
             }
         }
-
+    std::cout << std::endl;
     return H;
     }
 
 template<>
-MPO 
-toMPO(ChmstryMPO const& am, Args const& args) 
-    { 
+MPO
+toMPO(ChmstryMPO const& am, Args const& args)
+    {
     return toMPOImpl<ITensor>(am,{args,"CheckQN",false});
     }
 template<>
-IQMPO 
-toMPO(ChmstryMPO const& am, Args const& args) 
-    { 
+IQMPO
+toMPO(ChmstryMPO const& am, Args const& args)
+    {
     return toMPOImpl<IQTensor>(am,args);
     }
 
@@ -679,7 +726,7 @@ toMPO(ChmstryMPO const& am, Args const& args)
 //     const int N = sites.N();
 
 //     for(auto& t : am.terms())
-//     if(t.Nops() > 2) 
+//     if(t.Nops() > 2)
 //         {
 //         Error("Only at most 2-operator terms allowed for AutoMPO conversion to MPO/IQMPO");
 //         }
@@ -696,7 +743,7 @@ toMPO(ChmstryMPO const& am, Args const& args)
 //     for(int n = 0; n <= N; ++n)
 //         basis.at(n).emplace_back(IL,QN());
 
-//     //Fill up the basis array at each site with 
+//     //Fill up the basis array at each site with
 //     //the unique operator types occurring on the site
 //     //and starting a string of operators (i.e. first op of an HTerm)
 //     for(const auto& ht : am.terms())
@@ -705,7 +752,7 @@ toMPO(ChmstryMPO const& am, Args const& args)
 //         auto& bn = basis.at(n);
 //         auto test = [&ht](const SiteQN& sq){ return sq.st == ht.first(); };
 //         bool has_first = (std::find_if(bn.cbegin(),bn.cend(),test) != bn.end());
-//         if(!has_first) 
+//         if(!has_first)
 //             {
 //             auto Op = sites.op(ht.first().op,ht.first().i);
 //             bn.emplace_back(ht.first(),-div(Op));
@@ -768,7 +815,7 @@ toMPO(ChmstryMPO const& am, Args const& args)
 //     //all HTerms (operator strings) which begin on,
 //     //end on, or cross site "j"
 //     vector<vector<HTerm>> ht_by_n(N+1);
-//     for(const HTerm& ht : am.terms()) 
+//     for(const HTerm& ht : am.terms())
 //     for(const auto& st : ht.ops)
 //         {
 //         ht_by_n.at(st.i).push_back(ht);
@@ -867,7 +914,7 @@ toMPO(ChmstryMPO const& am, Args const& args)
 //             for(int c = 0; c < col.m(); ++c)
 //                 {
 //                 print(ws[r][c],"\t");
-//                 if(ws[r][c].length() < 8 && c == 1) 
+//                 if(ws[r][c].length() < 8 && c == 1)
 //                 print("\t");
 //                 }
 //             println("=========================================");
@@ -912,7 +959,7 @@ toMPO(ChmstryMPO const& am, Args const& args)
 //     return res.toMPO();
 //     }
 
-// std::ostream& 
+// std::ostream&
 // operator<<(std::ostream& s, const SiteTerm& t)
 //     {
 //     if(isReal(t.coef))
@@ -923,13 +970,13 @@ toMPO(ChmstryMPO const& am, Args const& args)
 //     }
 
 
-// std::ostream& 
+// std::ostream&
 // operator<<(std::ostream& s, const HTerm& t)
 //     {
 //     const char* pfix = "";
-//     if(abs(t.coef()-1.0) > 1E-12) 
+//     if(abs(t.coef()-1.0) > 1E-12)
 //         s << (isReal(t.coef()) ? format("%f ",t.coef().real()) : format("%f ",t.coef()));
-//     for(const auto& st : t.ops) 
+//     for(const auto& st : t.ops)
 //         {
 //         s << format("%s%s(%d)",pfix,st.op,st.i);
 //         pfix = " ";
@@ -937,7 +984,7 @@ toMPO(ChmstryMPO const& am, Args const& args)
 //     return s;
 //     }
 
-std::ostream& 
+std::ostream&
 operator<<(std::ostream& s, const ChmstryMPO& a)
     {
     s << "ChmstryMPO:\n";
@@ -946,7 +993,7 @@ operator<<(std::ostream& s, const ChmstryMPO& a)
     for(const auto& t : a.oneBodyTerms()) s << t;
     s << "Two body integrals:\n";
     for(const auto& t : a.twoBodyTerms()) s << t;
-    s << "Is hermitian: " << isHermitian(a.oneBodyTerms(), a.twoBodyTerms()) << "\n"; 
+    s << "Is hermitian: " << isHermitian(a.oneBodyTerms(), a.twoBodyTerms()) << "\n";
     return s;
     }
 

@@ -39,50 +39,50 @@ class IQIndex : public Index
 
     //
     // Construct IQIndex from name,
-    // collection of any number of 
+    // collection of any number of
     // Index-QN pairs.
     // Optional last argument can
     // be Arrow direction of the IQIndex:
     // IQIndex("name",i1,q1,i2,q2,In);
     //
     template<typename... Rest>
-    IQIndex(std::string const& name, 
-            Index const& i1, QN const& q1, 
+    IQIndex(std::string const& name,
+            Index const& i1, QN const& q1,
             Rest const&... etc);
 
     // Constructor taking a container
     // of IndexQN's
-    IQIndex(std::string const& name, 
-            storage && ind_qn, 
-            Arrow dir = Out, 
+    IQIndex(std::string const& name,
+            storage && ind_qn,
+            Arrow dir = Out,
             int plev = 0);
 
     //number of quantum number blocks
-    long 
+    long
     nblock() const;
 
-    long 
+    long
     nindex() const { return nblock(); }
 
     //1-indexed
-    Index 
+    Index
     index(long i) const;
 
     //0-indexed
-    Index 
+    Index
     operator[](long i) const;
 
     //1-indexed
-    QN const& 
+    QN const&
     qn(long i) const;
 
-    Arrow 
+    Arrow
     dir() const { return dir_; }
 
-    IQIndexVal 
+    IQIndexVal
     operator()(long n) const;
 
-    IQIndex& 
+    IQIndex&
     dag();
 
     const_iterator
@@ -91,10 +91,10 @@ class IQIndex : public Index
     const_iterator
     end() const;
 
-    void 
+    void
     write(std::ostream& s) const;
 
-    IQIndex& 
+    IQIndex&
     read(std::istream& s);
 
     private:
@@ -115,9 +115,9 @@ struct IndexQN
 
     IndexQN() { }
 
-    IndexQN(Index const& i, 
-            QN const& q) 
-        : index(i), qn(q) 
+    IndexQN(Index const& i,
+            QN const& q)
+        : index(i), qn(q)
         { }
 
     explicit operator Index() const { return index; }
@@ -178,22 +178,22 @@ class IQIndexVal
     IndexQN
     indexqn() const;
 
-    IndexVal 
+    IndexVal
     blockIndexVal() const;
 
-    IQIndexVal& 
+    IQIndexVal&
     dag();
 
-    IQIndexVal& 
+    IQIndexVal&
     prime(int inc = 1);
 
-    IQIndexVal& 
+    IQIndexVal&
     prime(IndexType type, int inc = 1);
 
-    IQIndexVal& 
+    IQIndexVal&
     noprime(IndexType type = All);
 
-    IQIndexVal& 
+    IQIndexVal&
     mapprime(int plevold, int plevnew, IndexType type = All);
     };
 
@@ -233,78 +233,81 @@ hasindex(IQIndex const& I, Index const& i);
 long
 findindex(IQIndex const& I, Index const& i);
 
-long 
+long
 offset(IQIndex const& I, Index const& i);
 
-QN 
+QN
 qn(IQIndex const& I, Index const& i);
 
 Index
 findByQN(IQIndex const& I, QN const& qn);
 
-std::string 
+bool
+hasQN(IQIndex const& I, QN const& qn);
+
+std::string
 showm(IQIndex const& I);
 
-std::ostream& 
+std::ostream&
 operator<<(std::ostream &o, IQIndex const& I);
 
-std::ostream& 
+std::ostream&
 operator<<(std::ostream &s, IndexQN const& x);
 
-std::ostream& 
+std::ostream&
 operator<<(std::ostream& s, IQIndexVal const& iv);
 
 template<typename... VArgs>
 IQIndex
-prime(IQIndex I, VArgs&&... vargs) 
-    { 
-    I.prime(std::forward<VArgs>(vargs)...); 
-    return I; 
+prime(IQIndex I, VArgs&&... vargs)
+    {
+    I.prime(std::forward<VArgs>(vargs)...);
+    return I;
     }
 
 template<typename... VArgs>
 IQIndex
-noprime(IQIndex I, VArgs&&... vargs) 
-    { 
-    I.noprime(std::forward<VArgs>(vargs)...); 
-    return I; 
+noprime(IQIndex I, VArgs&&... vargs)
+    {
+    I.noprime(std::forward<VArgs>(vargs)...);
+    return I;
     }
 
 //Return a copy of I with prime level changed to plevnew if
 //old prime level was plevold. Otherwise has no effect.
 IQIndex inline
-mapprime(IQIndex I, 
-         int plevold, 
-         int plevnew, 
+mapprime(IQIndex I,
+         int plevold,
+         int plevnew,
          IndexType type = All)
-    { 
-    I.mapprime(plevold,plevnew,type); 
-    return I; 
+    {
+    I.mapprime(plevold,plevnew,type);
+    return I;
     }
 
 template<typename... VArgs>
 IQIndexVal
-prime(IQIndexVal I, VArgs&&... vargs) 
-    { 
-    I.prime(std::forward<VArgs>(vargs)...); 
-    return I; 
+prime(IQIndexVal I, VArgs&&... vargs)
+    {
+    I.prime(std::forward<VArgs>(vargs)...);
+    return I;
     }
 
 template<typename... VArgs>
 IQIndexVal
-noprime(IQIndexVal I, VArgs&&... vargs) 
-    { 
-    I.noprime(std::forward<VArgs>(vargs)...); 
-    return I; 
+noprime(IQIndexVal I, VArgs&&... vargs)
+    {
+    I.noprime(std::forward<VArgs>(vargs)...);
+    return I;
     }
 
 //Return a copy of I with prime level changed to plevnew if
 //old prime level was plevold. Otherwise has no effect.
 IQIndexVal inline
 mapprime(IQIndexVal I, int plevold, int plevnew, IndexType type = All)
-    { 
-    I.mapprime(plevold,plevnew,type); 
-    return I; 
+    {
+    I.mapprime(plevold,plevnew,type);
+    return I;
     }
 
 namespace detail {
@@ -318,16 +321,16 @@ struct ArrowM
 
 ArrowM inline
 fill(std::vector<IndexQN> const& v,
-     Arrow dir = Out) 
-    { 
+     Arrow dir = Out)
+    {
     return ArrowM(dir,0l);
     }
 
 template<typename... Rest>
 ArrowM
 fill(std::vector<IndexQN> & v,
-     Index const& i, 
-     QN const& q, 
+     Index const& i,
+     QN const& q,
      Rest const&... rest)
     {
     v.emplace_back(i,q);
@@ -341,11 +344,11 @@ fill(std::vector<IndexQN> & v,
 
 template<typename... Rest>
 IQIndex::
-IQIndex(std::string const& name, 
-        Index const& i1, 
-        QN const& q1, 
+IQIndex(std::string const& name,
+        Index const& i1,
+        QN const& q1,
         Rest const&... rest)
-    { 
+    {
     constexpr auto size = 1+sizeof...(rest)/2;
     auto iq = stdx::reserve_vector<IndexQN>(size);
     auto am = detail::fill(iq,i1,q1,rest...);

@@ -30,9 +30,9 @@ using std::string;
 
 template <class T>
 MPSt<T>::
-MPSt() 
-    : 
-    N_(0), 
+MPSt()
+    :
+    N_(0),
     atb_(1),
     writedir_("./"),
     do_write_(false)
@@ -45,15 +45,15 @@ MPSt();
 template <class T>
 MPSt<T>::
 MPSt(int N)
-    : 
-    N_(N), 
+    :
+    N_(N),
     A_(N+2), //idmrg may use A_[0] and A[N+1]
     l_orth_lim_(0),
     r_orth_lim_(N+1),
     atb_(1),
     writedir_("./"),
     do_write_(false)
-    { 
+    {
     }
 template MPSt<ITensor>::
 MPSt(int N);
@@ -63,16 +63,16 @@ MPSt(int N);
 template <class T>
 MPSt<T>::
 MPSt(SiteSet const& sites)
-    : 
-    N_(sites.N()), 
+    :
+    N_(sites.N()),
     A_(sites.N()+2), //idmrg may use A_[0] and A[N+1]
     l_orth_lim_(0),
     r_orth_lim_(sites.N()+1),
-    sites_(sites), 
+    sites_(sites),
     atb_(1),
     writedir_("./"),
     do_write_(false)
-    { 
+    {
     random_tensors(A_);
     }
 template MPSt<ITensor>::
@@ -83,16 +83,16 @@ MPSt(SiteSet const& sites);
 template <class T>
 MPSt<T>::
 MPSt(InitState const& initState)
-    : 
+    :
     N_(initState.sites().N()),
     A_(initState.sites().N()+2), //idmrg may use A_[0] and A[N+1]
     l_orth_lim_(0),
     r_orth_lim_(2),
-    sites_(initState.sites()), 
+    sites_(initState.sites()),
     atb_(1),
     writedir_("./"),
     do_write_(false)
-    { 
+    {
     init_tensors(A_,initState);
     }
 template MPSt<ITensor>::
@@ -103,7 +103,7 @@ MPSt(InitState const& initState);
 template <class T>
 MPSt<T>::
 MPSt(MPSt const& other)
-    : 
+    :
     N_(other.N_),
     A_(other.A_),
     l_orth_lim_(other.l_orth_lim_),
@@ -112,7 +112,7 @@ MPSt(MPSt const& other)
     atb_(other.atb_),
     writedir_(other.writedir_),
     do_write_(other.do_write_)
-    { 
+    {
     copyWriteDir();
     }
 template MPSt<ITensor>::
@@ -123,7 +123,7 @@ MPSt(MPSt<IQTensor> const&);
 template <class Tensor>
 MPSt<Tensor>& MPSt<Tensor>::
 operator=(MPSt const& other)
-    { 
+    {
     N_ = other.N_;
     A_ = other.A_;
     l_orth_lim_ = other.l_orth_lim_;
@@ -153,10 +153,10 @@ template MPSt<IQTensor>::~MPSt();
 template <class Tensor>
 Tensor const& MPSt<Tensor>::
 A(int i) const
-    { 
+    {
     if(i < 0) i = N_+i+1;
     setSite(i);
-    return A_.at(i); 
+    return A_.at(i);
     }
 template
 const ITensor& MPSt<ITensor>::A(int i) const;
@@ -166,12 +166,12 @@ const IQTensor& MPSt<IQTensor>::A(int i) const;
 template <class T>
 T& MPSt<T>::
 Aref(int i)
-    { 
+    {
     if(i < 0) i = N_+i+1;
     setSite(i);
     if(i <= l_orth_lim_) l_orth_lim_ = i-1;
     if(i >= r_orth_lim_) r_orth_lim_ = i+1;
-    return A_.at(i); 
+    return A_.at(i);
     }
 template
 ITensor& MPSt<ITensor>::Aref(int i);
@@ -180,13 +180,13 @@ IQTensor& MPSt<IQTensor>::Aref(int i);
 
 template <class T>
 void MPSt<T>::
-doWrite(bool val, Args const& args) 
-    { 
+doWrite(bool val, Args const& args)
+    {
     if(val == do_write_) return;
 
     if(val == true)
         {
-        initWrite(args); 
+        initWrite(args);
         }
     else
         {
@@ -275,7 +275,7 @@ void MPSt<IQTensor>::read(std::string const& dirname);
 template <class Tensor>
 string MPSt<Tensor>::
 AFName(int j, string const& dirname) const
-    { 
+    {
     if(dirname == "")
         {
         return format("%s/A_%03d",writedir_,j);
@@ -405,13 +405,13 @@ new_tensors(std::vector<ITensor>& A_)
     {
     std::vector<Index> a(N_+1);
     for(int i = 1; i <= N_; ++i)
-        { 
-        a[i] = Index(nameint("a",i)); 
+        {
+        a[i] = Index(nameint("a",i));
         }
     A_[1] = ITensor(sites()(1),a[1]);
     for(int i = 2; i < N_; i++)
-        { 
-        A_[i] = ITensor(dag(a[i-1]),sites()(i),a[i]); 
+        {
+        A_[i] = ITensor(dag(a[i-1]),sites()(i),a[i]);
         }
     A_[N_] = ITensor(dag(a[N_-1]),sites()(N_));
     }
@@ -423,11 +423,11 @@ void MPSt<IQTensor>::new_tensors(std::vector<ITensor>& A_);
 template <class Tensor>
 void MPSt<Tensor>::
 random_tensors(std::vector<ITensor>& A_)
-    { 
-    new_tensors(A_); 
+    {
+    new_tensors(A_);
     for(int i = 1; i <= N_; ++i)
         {
-        randomize(A_[i]); 
+        randomize(A_[i]);
         }
     }
 template
@@ -438,7 +438,7 @@ void MPSt<IQTensor>::random_tensors(std::vector<ITensor>& A_);
 template <class Tensor>
 void MPSt<Tensor>::
 init_tensors(std::vector<ITensor>& A_, InitState const& initState)
-    { 
+    {
     std::vector<Index> a(N_+1);
     for(auto i : range1(N_)) a[i] = Index(nameint("a",i));
 
@@ -471,14 +471,14 @@ init_tensors(std::vector<IQTensor>& A_, const InitState& initState)
 
     auto a = std::vector<IQIndex>(N_+1);
     for(auto i : range1(N_))
-        { 
-        a[i] = IQIndex(nameint("L",i),Index(nameint("l",i)),qa[i]); 
+        {
+        a[i] = IQIndex(nameint("L",i),Index(nameint("l",i)),qa[i]);
         }
 
     A_[1] = setElt(initState(1),a[1](1));
     for(auto i : range(2,N_))
         {
-        A_[i] = setElt(dag(a[i-1])(1),initState(i),a[i](1)); 
+        A_[i] = setElt(dag(a[i-1])(1),initState(i),a[i](1));
         }
     A_[N_] = setElt(dag(a[N_-1])(1),initState(N_));
     }
@@ -548,7 +548,7 @@ init_tensors(std::vector<IQTensor>& A_, const InitState& initState);
 //    Anc(1) = A(1) * first[1] + other.A(1) * second[1];
 //    for(int i = 2; i < N_; ++i)
 //        {
-//        Anc(i) = dag(first[i-1]) * A(i) * first[i] 
+//        Anc(i) = dag(first[i-1]) * A(i) * first[i]
 //                  + dag(second[i-1]) * other.A(i) * second[i];
 //        }
 //    Anc(N) = dag(first[N-1]) * A(N) + dag(second[N-1]) * other.A(N);
@@ -570,11 +570,11 @@ plusEq(const MPSt<Tensor>& R,
     //cout << "calling new orthog in sum" << endl;
     if(!itensor::isOrtho(*this))
         {
-        try { 
-            orthogonalize(); 
+        try {
+            orthogonalize();
             }
-        catch(const ResultIsZero& rz) 
-            { 
+        catch(const ResultIsZero& rz)
+            {
             *this = R;
             return *this;
             }
@@ -583,11 +583,11 @@ plusEq(const MPSt<Tensor>& R,
     if(!itensor::isOrtho(R))
         {
         MPSt<Tensor> oR(R);
-        try { 
-            oR.orthogonalize(); 
+        try {
+            oR.orthogonalize();
             }
-        catch(const ResultIsZero& rz) 
-            { 
+        catch(const ResultIsZero& rz)
+            {
             return *this;
             }
         return addAssumeOrth(*this,oR,args);
@@ -611,11 +611,11 @@ plusEq(const MPSt<IQTensor>& R, const Args& args);
 template <class Tensor>
 void MPSt<Tensor>::
 mapprime(int oldp, int newp, IndexType type)
-    { 
+    {
     if(do_write_)
         Error("mapprime not supported if doWrite(true)");
-    for(int i = 1; i <= N_; ++i) 
-        A_[i].mapprime(oldp,newp,type); 
+    for(int i = 1; i <= N_; ++i)
+        A_[i].mapprime(oldp,newp,type);
     }
 template
 void MPSt<ITensor>::mapprime(int oldp, int newp, IndexType type);
@@ -625,11 +625,11 @@ void MPSt<IQTensor>::mapprime(int oldp, int newp, IndexType type);
 template <class Tensor>
 void MPSt<Tensor>::
 primelinks(int oldp, int newp)
-    { 
+    {
     if(do_write_)
         Error("primelinks not supported if doWrite(true)");
-    for(int i = 1; i <= N_; ++i) 
-        A_[i].mapprime(oldp,newp,Link); 
+    for(int i = 1; i <= N_; ++i)
+        A_[i].mapprime(oldp,newp,Link);
     }
 template
 void MPSt<ITensor>::primelinks(int oldp, int newp);
@@ -639,18 +639,18 @@ void MPSt<IQTensor>::primelinks(int oldp, int newp);
 template <class Tensor>
 void MPSt<Tensor>::
 noprimelink()
-    { 
+    {
     if(do_write_)
         Error("noprimelink not supported if doWrite(true)");
-    for(int i = 1; i <= N_; ++i) 
-        A_[i].noprime(Link); 
+    for(int i = 1; i <= N_; ++i)
+        A_[i].noprime(Link);
     }
 template
 void MPSt<ITensor>::noprimelink();
 template
 void MPSt<IQTensor>::noprimelink();
 
-template<class Tensor> 
+template<class Tensor>
 Spectrum MPSt<Tensor>::
 svdBond(int b, const Tensor& AA, Direction dir, const Args& args)
     {
@@ -665,10 +665,10 @@ svdBond(int b, const IQTensor& AA, Direction dir, const Args& args);
 struct SqrtInv
     {
     Real
-    operator()(Real val) const 
-        { 
+    operator()(Real val) const
+        {
         if(val == 0) return 0;
-        return 1./std::sqrt(std::fabs(val)); 
+        return 1./std::sqrt(std::fabs(val));
         }
     };
 
@@ -708,7 +708,7 @@ template Spectrum
 orthMPS(IQTensor& A1, IQTensor& A2, Direction dir, const Args& args);
 
 
-template<class Tensor> 
+template<class Tensor>
 void MPSt<Tensor>::
 position(int i, Args const& args)
     {
@@ -758,8 +758,8 @@ position(int b, const Args& args);
 
 template <class Tensor>
 int MPSt<Tensor>::
-orthoCenter() const 
-    { 
+orthoCenter() const
+    {
     if(!itensor::isOrtho(*this)) Error("orthogonality center not well defined.");
     return (leftLim() + 1);
     }
@@ -826,20 +826,20 @@ makeKroneckerDelta(const IQIndex& I, int plev)
 //    //        % i
 //    //        % Diff.norm()
 //    //        << endl;
-//    if(Diff.norm() < threshold) 
+//    if(Diff.norm() < threshold)
 //        {
 //        return true;
 //        }
 //
 //    //Print any helpful debugging info here:
-//    cout << "checkOrtho: on line " << __LINE__ 
+//    cout << "checkOrtho: on line " << __LINE__
 //         << " of mps.h," << endl;
-//    cout << "checkOrtho: Tensor at position " << i 
-//         << " failed to be " << (left ? "left" : "right") 
+//    cout << "checkOrtho: Tensor at position " << i
+//         << " failed to be " << (left ? "left" : "right")
 //         << " ortho." << endl;
-//    cout << "checkOrtho: Diff.norm() = " << format("%E") 
+//    cout << "checkOrtho: Diff.norm() = " << format("%E")
 //         % Diff.norm() << endl;
-//    cout << "checkOrtho: Error threshold set to " 
+//    cout << "checkOrtho: Error threshold set to "
 //              << format("%E") % threshold << endl;
 //    //-----------------------------
 //
@@ -857,7 +857,7 @@ makeKroneckerDelta(const IQIndex& I, int plev)
 //    for(int i = 1; i <= l_orth_lim_; ++i)
 //    if(!checkLeftOrtho(i))
 //        {
-//        cout << "checkOrtho: A_[i] not left orthogonal at site i=" 
+//        cout << "checkOrtho: A_[i] not left orthogonal at site i="
 //                  << i << endl;
 //        return false;
 //        }
@@ -865,7 +865,7 @@ makeKroneckerDelta(const IQIndex& I, int plev)
 //    for(int i = N(); i >= r_orth_lim_; --i)
 //    if(!checkRightOrtho(i))
 //        {
-//        cout << "checkOrtho: A_[i] not right orthogonal at site i=" 
+//        cout << "checkOrtho: A_[i] not right orthogonal at site i="
 //                  << i << endl;
 //        return false;
 //        }
@@ -893,7 +893,7 @@ makeKroneckerDelta(const IQIndex& I, int plev)
 
 //template <class Tensor>
 //void MPSt<Tensor>::
-//applygate(const BondGate<Tensor>& gate, 
+//applygate(const BondGate<Tensor>& gate,
 //          const Args& args)
 //    {
 //    const int gate_b = std::min(gate.i(),gate.j());
@@ -909,8 +909,8 @@ makeKroneckerDelta(const IQIndex& I, int plev)
 
 template <class Tensor>
 Real MPSt<Tensor>::
-norm() const 
-    { 
+norm() const
+    {
     return itensor::norm(*this);
     }
 template Real MPSt<ITensor>::
@@ -934,7 +934,7 @@ normalize();
 template <class Tensor>
 bool MPSt<Tensor>::
 isComplex() const
-    { 
+    {
     for(auto j : range1(N_))
         {
         if(itensor::isComplex(A_[j])) return true;
@@ -1015,7 +1015,7 @@ cleanupWrite()
         const string cmdstr = "rm -fr " + writedir_;
         system(cmdstr.c_str());
         do_write_ = false;
-        }   
+        }
     }
 template
 void MPSt<ITensor>::cleanupWrite();
@@ -1043,10 +1043,10 @@ void MPSt<IQTensor>::swap(MPSt<IQTensor>& other);
 
 InitState::
 InitState(SiteSet const& sites)
-    : 
-    sites_(sites), 
+    :
+    sites_(sites),
     state_(1+sites.N())
-    { 
+    {
     for(int n = 1; n <= sites_.N(); ++n)
         {
         state_[n] = sites_(n)(1);
@@ -1055,16 +1055,16 @@ InitState(SiteSet const& sites)
 
 InitState::
 InitState(SiteSet const& sites, String const& state)
-    : 
-    sites_(sites), 
+    :
+    sites_(sites),
     state_(1+sites.N())
-    { 
+    {
     setAll(state);
     }
 
 InitState& InitState::
 set(int i, const String& state)
-    { 
+    {
     checkRange(i);
     state_.at(i) = sites_(i,state);
     return *this;
@@ -1072,7 +1072,7 @@ set(int i, const String& state)
 
 InitState& InitState::
 setAll(String const& state)
-    { 
+    {
     for(int n = 1; n <= sites_.N(); ++n)
         {
         state_[n] = sites_(n,state);
@@ -1083,7 +1083,7 @@ setAll(String const& state)
 void InitState::
 checkRange(int i) const
     {
-    if(i > sites_.N() || i < 1) 
+    if(i > sites_.N() || i < 1)
         {
         println("i = ",i);
         println("Valid range is 1 to ",sites_.N());
@@ -1092,10 +1092,10 @@ checkRange(int i) const
     }
 
 //Auxilary method for convertToIQ
-long 
+long
 collapseCols(Vector const& Diag, Matrix& M)
     {
-    long nr = Diag.size(), 
+    long nr = Diag.size(),
          nc = long(sumels(Diag));
     assert(nr != 0);
     if(nc == 0) return nc;
@@ -1106,7 +1106,7 @@ collapseCols(Vector const& Diag, Matrix& M)
     return nc;
     }
 
-int 
+int
 periodicWrap(int j, int N)
     {
     if(j < 1)
@@ -1117,8 +1117,8 @@ periodicWrap(int j, int N)
     return j;
     }
 
-//void 
-//convertToIQ(const SiteSet& sites, const vector<ITensor>& A, 
+//void
+//convertToIQ(const SiteSet& sites, const vector<ITensor>& A,
 //            vector<IQTensor>& qA, QN totalq, Real cut)
 //    {
 //    const int N = sites.N();
@@ -1141,7 +1141,7 @@ periodicWrap(int j, int N)
 //
 //    for(int j = 1; j <= N; ++j)
 //        if(A[j].r() == fullrank)
-//            if(A.at(periodicWrap(j-1,N)).r() < fullrank) 
+//            if(A.at(periodicWrap(j-1,N)).r() < fullrank)
 //                {
 //                start = periodicWrap(j-1,N);
 //                //cout << "Got start at " << start << "\n";
@@ -1150,7 +1150,7 @@ periodicWrap(int j, int N)
 //
 //    for(int j = 1; j <= N; ++j)
 //        if(A[j].r() == fullrank)
-//            if(A.at(periodicWrap(j+1,N)).r() < fullrank) 
+//            if(A.at(periodicWrap(j+1,N)).r() < fullrank)
 //                {
 //                end = periodicWrap(j+1,N);
 //                //cout << "Got end at " << end << "\n";
@@ -1181,14 +1181,14 @@ periodicWrap(int j, int N)
 //    const int show_s = 0;
 //
 //    Index bond, prev_bond;
-//    int Send = (end < start ? N+end : end); 
+//    int Send = (end < start ? N+end : end);
 //    for(int S = start; S <= Send; ++S)
 //        {
 //        int s = periodicWrap(S,N);
 //        int sprev = periodicWrap(S-1,N);
 //        int snext = periodicWrap(S+1,N);
 //
-//        qD.clear(); 
+//        qD.clear();
 //        qt.clear();
 //
 //        if(S > start) prev_bond = commonIndex(A[sprev],A[s],Link);
@@ -1196,20 +1196,20 @@ periodicWrap(int j, int N)
 //
 //        if(s == show_s) { PrintData(A[s]); }
 //
-//        for(const qC_vt& x : qC) 
+//        for(const qC_vt& x : qC)
 //        for(int n = 1; n <= Dim;  ++n)
 //        for(int u = 1; u <= PDim; ++u)
 //            {
 //            //Each compressor represents a particular
 //            //QN channel given by prev_q
-//            const QN& prev_q = x.first; 
+//            const QN& prev_q = x.first;
 //            //Alias previous compressor ITensor to comp
-//            const ITensor& comp = x.second; 
+//            const ITensor& comp = x.second;
 //
-//            q = (is_mpo ? prev_q+sites.si(s).qn(n)-sites.si(s).qn(u) 
+//            q = (is_mpo ? prev_q+sites.si(s).qn(n)-sites.si(s).qn(u)
 //                        : prev_q-sites.si(s).qn(n));
 //
-//            //For the last site, only keep blocks 
+//            //For the last site, only keep blocks
 //            //compatible with specified totalq i.e. q=0 here
 //            if(S == Send && q != QN()) continue;
 //
@@ -1223,10 +1223,10 @@ periodicWrap(int j, int N)
 //            //the right Link Index to keep for the current QN q)
 //            auto count = qD.count(q);
 //            Vector& D = qD[q];
-//            if(count == 0) 
-//                { 
-//                D.resize(bond.m()); 
-//                for(auto& el : D) el = 0; 
+//            if(count == 0)
+//                {
+//                D.resize(bond.m());
+//                for(auto& el : D) el = 0;
 //                }
 //
 //            if(s == show_s)
@@ -1239,19 +1239,19 @@ periodicWrap(int j, int N)
 //                }
 //
 //            bool keep_block = false;
-//            if(S == Send) 
+//            if(S == Send)
 //                { keep_block = true; }
 //            else
 //                {
-//                if(bond.m() == 1 && norm(block) != 0) 
-//                    { 
-//                    for(auto& el : D) el = 1; 
-//                    keep_block = true; 
+//                if(bond.m() == 1 && norm(block) != 0)
+//                    {
+//                    for(auto& el : D) el = 1;
+//                    keep_block = true;
 //                    }
 //                else
 //                    {
 //                    ITensor summed_block;
-//                    if(S==start) 
+//                    if(S==start)
 //                        { summed_block = block; }
 //                    else
 //                        {
@@ -1276,10 +1276,10 @@ periodicWrap(int j, int N)
 //                    if(rel_cut > 0)
 //                    for(int j = 1; j <= bond.m(); ++j)
 //                        {
-//                        if(std::fabs(sb.real(bond(j))) > rel_cut) 
-//                            { 
-//                            D(j) = 1; 
-//                            keep_block = true; 
+//                        if(std::fabs(sb.real(bond(j))) > rel_cut)
+//                            {
+//                            D(j) = 1;
+//                            keep_block = true;
 //                            }
 //                        }
 //                    }
@@ -1290,14 +1290,14 @@ periodicWrap(int j, int N)
 //                qD[q] = D;
 //
 //                IndexSet newinds(block.inds());
-//                if(is_mpo) 
+//                if(is_mpo)
 //                    {
 //                    newinds.addindex(dag(sites.si(s)(n).indexqn()));
 //                    newinds.addindex(sites.siP(s)(u).indexqn());
 //                    }
-//                else 
-//                    { 
-//                    newinds.addindex(sites.si(s)(n).indexqn()); 
+//                else
+//                    {
+//                    newinds.addindex(sites.si(s)(n).indexqn());
 //                    }
 //
 //                if(s==show_s)
@@ -1318,12 +1318,12 @@ periodicWrap(int j, int N)
 //            const vector<ITensor>& blks = x.second;
 //            if(blks.size() != 0)
 //                {
-//                q = x.first; 
-//                if(S == Send) 
+//                q = x.first;
+//                if(S == Send)
 //                    { for(const ITensor& t : blks) nblock.push_back(t); }
 //                else
 //                    {
-//                    Matrix M; 
+//                    Matrix M;
 //                    auto mm = collapseCols(qD[q],M);
 //                    if(s==show_s)
 //                        {
@@ -1332,7 +1332,7 @@ periodicWrap(int j, int N)
 //                        cout << "qD[q] = " << qD[q] << "\n";
 //                        cout << "M = \n" << M << "\n";
 //                        int count = 0;
-//                        for(const ITensor& t : blks) 
+//                        for(const ITensor& t : blks)
 //                            {
 //                            printfln("t%02d",++count," ",t);
 //                            }
@@ -1347,34 +1347,34 @@ periodicWrap(int j, int N)
 //                }
 //            }
 //
-//        if(S != Send) 
-//            { 
-//            if(iq.empty()) 
+//        if(S != Send)
+//            {
+//            if(iq.empty())
 //                {
 //                cout << "At site " << s << "\n";
 //                Error("convertToIQ: no compatible QNs to put into Link.");
 //                }
-//            linkind[s] = IQIndex(nameint("qL",s),std::move(iq)); 
+//            linkind[s] = IQIndex(nameint("qL",s),std::move(iq));
 //            }
 //        if(S == start)
 //            {
-//            qA.at(s) = (is_mpo ? IQTensor(dag(sites.si(s)),sites.siP(s),linkind.at(s)) 
+//            qA.at(s) = (is_mpo ? IQTensor(dag(sites.si(s)),sites.siP(s),linkind.at(s))
 //                            : IQTensor(sites.si(s),linkind[s]));
 //            }
-//        else 
+//        else
 //        if(S == Send)
 //            {
-//            qA.at(s) = (is_mpo ? IQTensor(dag(linkind[sprev]),dag(sites.si(s)),sites.siP(s)) 
+//            qA.at(s) = (is_mpo ? IQTensor(dag(linkind[sprev]),dag(sites.si(s)),sites.siP(s))
 //                            : IQTensor(dag(linkind[sprev]),sites.si(s)));
 //            }
 //        else
 //            {
-//            qA.at(s) = (is_mpo ? IQTensor(dag(linkind[sprev]),dag(sites.si(s)),sites.siP(s),linkind[s]) 
+//            qA.at(s) = (is_mpo ? IQTensor(dag(linkind[sprev]),dag(sites.si(s)),sites.siP(s),linkind[s])
 //                            : IQTensor(dag(linkind[sprev]),sites.si(s),linkind[s]));
 //            }
 //
-//        for(const ITensor& nb : nblock) 
-//            { qA.at(s) += nb; } 
+//        for(const ITensor& nb : nblock)
+//            { qA.at(s) += nb; }
 //        nblock.clear();
 //
 //        if(s==show_s)
@@ -1388,8 +1388,8 @@ periodicWrap(int j, int N)
 //    } //void convertToIQ
 
 /*
-template <class Tensor> 
-template <class IQMPSType> 
+template <class Tensor>
+template <class IQMPSType>
 void MPSt<Tensor>::convertToIQ(IQMPSType& iqpsi, QN totalq, Real cut) const
 {
     assert(sites_ != 0);
@@ -1426,22 +1426,22 @@ void MPSt<Tensor>::convertToIQ(IQMPSType& iqpsi, QN totalq, Real cut) const
     {
 
         qD.clear(); qt.clear();
-        if(s > 1) prev_bond = linkInd(*this,s-1); 
+        if(s > 1) prev_bond = linkInd(*this,s-1);
         if(s < N) bond = linkInd(*this,s);
 
-        if(s == show_s) 
+        if(s == show_s)
         {
             PrintData(A_[s]);
         }
 
         Foreach(const qC_vt& x, qC) {
-        const QN& prev_q = x.first; const ITensor& comp = x.second; 
+        const QN& prev_q = x.first; const ITensor& comp = x.second;
         for(int n = 1; n <= Dim;  ++n)
         for(int u = 1; u <= PDim; ++u)
         {
             q = (is_mpo ? prev_q+si(s).qn(n)-si(s).qn(u) : prev_q-si(s).qn(n));
 
-            //For the last site, only keep blocks 
+            //For the last site, only keep blocks
             //compatible with specified totalq i.e. q=0 here
             if(s == N && q != QN()) continue;
 
@@ -1496,7 +1496,7 @@ void MPSt<Tensor>::convertToIQ(IQMPSType& iqpsi, QN totalq, Real cut) const
 
                     if(rel_cut > 0)
                     for(int j = 1; j <= bond.m(); ++j)
-                    if(std::fabs(summed_block.val1(j)) > rel_cut) 
+                    if(std::fabs(summed_block.val1(j)) > rel_cut)
                     { D(j) = 1; keep_block = true; }
                 }
             } //else (s != N)
@@ -1507,7 +1507,7 @@ void MPSt<Tensor>::convertToIQ(IQMPSType& iqpsi, QN totalq, Real cut) const
             {
                 qD[q] = D;
 
-                if(is_mpo) 
+                if(is_mpo)
                 {
                 block.addindex(dag(si(s)(n).index()));
                 block.addindex(siP(s)(u).index());
@@ -1531,12 +1531,12 @@ void MPSt<Tensor>::convertToIQ(IQMPSType& iqpsi, QN totalq, Real cut) const
             const vector<ITensor>& blks = x.second;
             if(blks.size() != 0)
                 {
-                q = x.first; 
-                if(s == N) 
+                q = x.first;
+                if(s == N)
                     { Foreach(const ITensor& t, blks) nblock.push_back(t); }
                 else
                     {
-                    Matrix M; 
+                    Matrix M;
                     auto mm = collapseCols(qD[q],M);
                     if(s==show_s)
                         {
@@ -1545,7 +1545,7 @@ void MPSt<Tensor>::convertToIQ(IQMPSType& iqpsi, QN totalq, Real cut) const
                         cout << "qD[q] = " << qD[q] << "\n";
                         cout << "M = \n" << M << "\n";
                         int count = 0;
-                        Foreach(const ITensor& t, blks) 
+                        Foreach(const ITensor& t, blks)
                         t.print((format("t%02d")%(++count)).str(),ShowData);
                         }
                     //string qname = (format("ql%d(%+d:%d:%s)")%s%q.sz()%q.Nf()%(q.Nfp() == 0 ? "+" : "-")).str();
@@ -1559,14 +1559,14 @@ void MPSt<Tensor>::convertToIQ(IQMPSType& iqpsi, QN totalq, Real cut) const
                 }
             }
 
-        if(s != N) 
-        { 
-            if(iq.empty()) 
+        if(s != N)
+        {
+            if(iq.empty())
             {
                 cout << "At site " << s << "\n";
                 Error("convertToIQ: no compatible QNs to put into Link.");
             }
-            linkind[s] = IQIndex(nameint("qL",s),iq); iq.clear(); 
+            linkind[s] = IQIndex(nameint("qL",s),iq); iq.clear();
         }
         if(s == 1)
         {
@@ -1574,19 +1574,19 @@ void MPSt<Tensor>::convertToIQ(IQMPSType& iqpsi, QN totalq, Real cut) const
         }
         else if(s == N)
         {
-            iqpsi.Anc(s) = (is_mpo ? IQTensor(dag(linkind[s-1]),dag(si(s)),siP(s)) 
+            iqpsi.Anc(s) = (is_mpo ? IQTensor(dag(linkind[s-1]),dag(si(s)),siP(s))
                                     : IQTensor(dag(linkind[s-1]),si(s)));
         }
         else
         {
-            iqpsi.Anc(s) = (is_mpo ? IQTensor(dag(linkind[s-1]),dag(si(s)),siP(s),linkind[s]) 
+            iqpsi.Anc(s) = (is_mpo ? IQTensor(dag(linkind[s-1]),dag(si(s)),siP(s),linkind[s])
                                     : IQTensor(dag(linkind[s-1]),si(s),linkind[s]));
         }
 
         Foreach(const ITensor& nb, nblock) { iqpsi.Anc(s) += nb; } nblock.clear();
 
         if(0) //try to get this working ideally
-        if(!is_mpo && s > 1) 
+        if(!is_mpo && s > 1)
         {
             IQTensor AA = iqpsi.bondTensor(s-1);
             iqpsi.doSVD(s-1,AA,Fromleft);
@@ -1605,10 +1605,10 @@ void MPSt<Tensor>::convertToIQ(IQMPSType& iqpsi, QN totalq, Real cut) const
 } //void convertToIQ(IQMPSType& iqpsi) const
 */
 
-int 
+int
 findCenter(IQMPS const& psi)
     {
-    for(int j = 1; j <= psi.N(); ++j) 
+    for(int j = 1; j <= psi.N(); ++j)
         {
         auto& A = psi.A(j);
         if(A.r() == 0) Error("Zero rank tensor in MPS");
@@ -1632,11 +1632,11 @@ findCenter(IQMPS const& psi)
 
 
 template <class T>
-std::ostream& 
+std::ostream&
 operator<<(std::ostream& s, MPSt<T> const& M)
     {
     s << "\n";
-    for(int i = 1; i <= M.N(); ++i) 
+    for(int i = 1; i <= M.N(); ++i)
         {
         s << M.A(i) << "\n";
         }
@@ -1645,11 +1645,11 @@ operator<<(std::ostream& s, MPSt<T> const& M)
 template std::ostream& operator<<(std::ostream& s, const MPSt<ITensor>& M);
 template std::ostream& operator<<(std::ostream& s, const MPSt<IQTensor>& M);
 
-std::ostream& 
+std::ostream&
 operator<<(std::ostream& s, InitState const& state)
     {
     s << "\n";
-    for(int i = 1; i <= state.sites().N(); ++i) 
+    for(int i = 1; i <= state.sites().N(); ++i)
         {
         s << state(i) << "\n";
         }

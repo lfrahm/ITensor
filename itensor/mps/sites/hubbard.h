@@ -53,22 +53,22 @@ class HubbardSite
     IQIndexVal
     state(std::string const& state)
         {
-        if(state == "0" || state == "Emp") 
+        if(state == "0" || state == "Emp")
             {
             return s(1);
             }
-        else 
-        if(state == "+" || state == "Up") 
+        else
+        if(state == "+" || state == "Up")
             {
             return s(2);
             }
-        else 
-        if(state == "-" || state == "Dn") 
+        else
+        if(state == "-" || state == "Dn")
             {
             return s(3);
             }
-        else 
-        if(state == "S" || state == "UpDn") 
+        else
+        if(state == "S" || state == "UpDn")
             {
             return s(4);
             }
@@ -122,55 +122,79 @@ class HubbardSite
         else
         if(opname == "Cup")
             {
-            Op.set(Up,EmP,1); 
-            Op.set(UD,DnP,1); 
+            Op.set(Up,EmP,1);
+            Op.set(UD,DnP,1);
+            }
+        else
+        if(opname == "CupF")
+            {
+            Op.set(Up,EmP,-1);
+            Op.set(UD,DnP,1);
             }
         else
         if(opname == "Cdagup")
             {
-            Op.set(Em,UpP,1); 
+            Op.set(Em,UpP,1);
             Op.set(Dn,UDP,1);
+            }
+        else
+        if(opname == "CdagupF")
+            {
+            Op.set(Em,UpP,1);
+            Op.set(Dn,UDP,-1);
             }
         else
         if(opname == "Cdn")
             {
-            Op.set(Dn,EmP,1); 
-            Op.set(UD,UpP,-1); 
+            Op.set(Dn,EmP,1);
+            Op.set(UD,UpP,-1);
+            }
+        else
+        if(opname == "CdnF")
+            {
+            Op.set(Dn,EmP,-1);
+            Op.set(UD,UpP,-1);
             }
         else
         if(opname == "Cdagdn")
             {
-            Op.set(Em,DnP,1); 
+            Op.set(Em,DnP,1);
             Op.set(Up,UDP,-1);
+            }
+        else
+        if(opname == "CdagdnF")
+            {
+            Op.set(Em,DnP,1);
+            Op.set(Up,UDP,1);
             }
         else
         if(opname == "Aup")
             {
-            Op.set(Up,EmP,1); 
-            Op.set(UD,DnP,1); 
+            Op.set(Up,EmP,1);
+            Op.set(UD,DnP,1);
             }
         else
         if(opname == "Adagup")
             {
-            Op.set(Em,UpP,1); 
+            Op.set(Em,UpP,1);
             Op.set(Dn,UDP,1);
             }
         else
         if(opname == "Adn")
             {
-            Op.set(Dn,EmP,1); 
-            Op.set(UD,UpP,1); 
+            Op.set(Dn,EmP,1);
+            Op.set(UD,UpP,1);
             }
         else
         if(opname == "Adagdn")
             {
-            Op.set(Em,DnP,1); 
+            Op.set(Em,DnP,1);
             Op.set(Up,UDP,1);
             }
         else
         if(opname == "FermiPhase" || opname == "F")
             {
-            Op.set(Em,EmP,+1); 
+            Op.set(Em,EmP,+1);
             Op.set(Up,UpP,-1);
             Op.set(Dn,DnP,-1);
             Op.set(UD,UDP,+1);
@@ -178,7 +202,7 @@ class HubbardSite
         else
         if(opname == "Fup")
             {
-            Op.set(Em,EmP,+1); 
+            Op.set(Em,EmP,+1);
             Op.set(Up,UpP,-1);
             Op.set(Dn,DnP,+1);
             Op.set(UD,UDP,-1);
@@ -186,7 +210,7 @@ class HubbardSite
         else
         if(opname == "Fdn")
             {
-            Op.set(Em,EmP,+1); 
+            Op.set(Em,EmP,+1);
             Op.set(Up,UpP,+1);
             Op.set(Dn,DnP,-1);
             Op.set(UD,UDP,-1);
@@ -194,24 +218,24 @@ class HubbardSite
         else
         if(opname == "Sz")
             {
-            Op.set(Up,UpP,+0.5); 
+            Op.set(Up,UpP,+0.5);
             Op.set(Dn,DnP,-0.5);
             }
         else
         if(opname == "S+")
             {
-            Op.set(Dn,UpP,1); 
+            Op.set(Dn,UpP,1);
             }
         else
         if(opname == "S-")
             {
-            Op.set(Up,DnP,1); 
+            Op.set(Up,DnP,1);
             }
         else
         if(opname == "S2")
             {
             //S dot S on-site
-            Op.set(Up,UpP,0.75); 
+            Op.set(Up,UpP,0.75);
             Op.set(Dn,DnP,0.75);
             }
         else

@@ -12,29 +12,29 @@
 namespace itensor {
 
 //
-// Use the Davidson algorithm to find the 
+// Use the Davidson algorithm to find the
 // eigenvector of the Hermitian matrix A with minimal eigenvalue.
 // (BigMatrixT objects must implement the methods product, size and diag.)
 // Returns the minimal eigenvalue lambda such that
 // A phi = lambda phi.
 //
-template <class BigMatrixT, class Tensor> 
-Real 
-davidson(BigMatrixT const& A, 
+template <class BigMatrixT, class Tensor>
+Real
+davidson(BigMatrixT const& A,
          Tensor& phi,
          Args const& args = Args::global());
 
 //
-// Use Davidson to find the N eigenvectors with smallest 
-// eigenvalues of the Hermitian matrix A, given a vector of N 
+// Use Davidson to find the N eigenvectors with smallest
+// eigenvalues of the Hermitian matrix A, given a vector of N
 // initial guesses (zero indexed).
 // (BigMatrixT objects must implement the methods product, size and diag.)
 // Returns a vector of the N smallest eigenvalues corresponding
 // to the set of eigenvectors phi.
 //
-template <class BigMatrixT, class Tensor> 
+template <class BigMatrixT, class Tensor>
 std::vector<Real>
-davidson(BigMatrixT const& A, 
+davidson(BigMatrixT const& A,
          std::vector<Tensor>& phi,
          Args const& args = Args::global());
 
@@ -45,9 +45,9 @@ davidson(BigMatrixT const& A,
 //
 
 
-template <class BigMatrixT, class Tensor> 
+template <class BigMatrixT, class Tensor>
 Real
-davidson(BigMatrixT const& A, 
+davidson(BigMatrixT const& A,
          Tensor& phi,
          Args const& args)
     {
@@ -58,9 +58,9 @@ davidson(BigMatrixT const& A,
     return eigs.front();
     }
 
-template <class BigMatrixT, class Tensor> 
+template <class BigMatrixT, class Tensor>
 std::vector<Real>
-davidson(BigMatrixT const& A, 
+davidson(BigMatrixT const& A,
          std::vector<Tensor>& phi,
          Args const& args)
     {
@@ -76,7 +76,7 @@ davidson(BigMatrixT const& A,
     for(auto j : range(nget))
         {
         auto nrm = norm(phi[j]);
-        while(nrm == 0.0) 
+        while(nrm == 0.0)
             {
             randomize(phi[j]);
             nrm = norm(phi[j]);
@@ -102,7 +102,7 @@ davidson(BigMatrixT const& A,
     auto V = std::vector<Tensor>(actual_maxiter+2);
     auto AV = std::vector<Tensor>(actual_maxiter+2);
 
-    //Storage for Matrix that gets diagonalized 
+    //Storage for Matrix that gets diagonalized
     //set to NAN to ensure failure if we use uninitialized elements
     auto M = CMatrix(actual_maxiter+2,actual_maxiter+2);
     for(auto& el : M) el = Cplx(NAN,NAN);
@@ -139,7 +139,7 @@ davidson(BigMatrixT const& A,
         //Diagonalize dag(V)*A*V
         //and compute the residual q
 
-        auto ni = ii+1; 
+        auto ni = ii+1;
         auto& q = V.at(ni);
         auto& phi_t = phi.at(t);
         auto& lambda = eigs.at(t);
@@ -152,7 +152,7 @@ davidson(BigMatrixT const& A,
             //Calculate residual q
             q = AV[0] - lambda*V[0];
             //printfln("ii=%d, q = \n%f",ii,q);
-            } 
+            }
         else // ii != 0
             {
             Mref *= -1;
@@ -194,14 +194,14 @@ davidson(BigMatrixT const& A,
         //Check convergence
         qnorm = norm(q);
 
-        bool converged = (qnorm < errgoal_ && std::abs(lambda-last_lambda) < errgoal_) 
+        bool converged = (qnorm < errgoal_ && std::abs(lambda-last_lambda) < errgoal_)
                          || qnorm < std::max(Approx0,errgoal_ * 1E-3);
 
         last_lambda = lambda;
 
         if((qnorm < 1E-20) || (converged && ii >= miniter_) || (ii == actual_maxiter))
             {
-            if(t < (nget-1) && ii < actual_maxiter) 
+            if(t < (nget-1) && ii < actual_maxiter)
                 {
                 ++t;
                 last_lambda = 1000.;
@@ -221,7 +221,7 @@ davidson(BigMatrixT const& A,
                 goto done;
                 }
             }
-        
+
         if(debug_level_ >= 2 || (ii == 0 && debug_level_ >= 1))
             {
             printf("I %d q %.0E E",iter,qnorm);
@@ -280,15 +280,11 @@ davidson(BigMatrixT const& A,
             auto qnrm = norm(q);
             if(qnrm < 1E-10)
                 {
-                printf("abcd\n");
                 //Orthogonalization failure,
                 //try randomizing
                 if(debug_level_ >= 2) println("Vector not independent, randomizing");
-                // q = V.at(ni-1);
-                // randomize(q);
-                auto setOne = [](Real r) { return (r!=0) ? 1.0 : 0.0; };
-
-                q.apply(setOne);
+                q = V.at(ni-1);
+                randomize(q);
                 qnrm = norm(q);
                 //Do another orthog pass
                 --pass;
@@ -318,7 +314,7 @@ davidson(BigMatrixT const& A,
         if(debug_level_ >= 3) println("Done with orthog step");
 
         //Check V's are orthonormal
-        //Mat Vo(ni+1,ni+1,NAN); 
+        //Mat Vo(ni+1,ni+1,NAN);
         //for(int r = 1; r <= ni+1; ++r)
         //for(int c = r; c <= ni+1; ++c)
         //    {

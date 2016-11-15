@@ -3,11 +3,11 @@
 namespace itensor {
 
 
-template<typename IndexT> 
+template<typename IndexT>
 ITensorT<IndexT>& ITensorT<IndexT>::
 fill(Cplx z)
     {
-    if(!store_) 
+    if(!store_)
         {
         if(is_) detail::allocReal(*this);
         else Error("Can't fill default-constructed tensor");
@@ -22,15 +22,15 @@ fill(Cplx z)
 template ITensorT<Index>& ITensorT<Index>::fill(Cplx z);
 template ITensorT<IQIndex>& ITensorT<IQIndex>::fill(Cplx z);
 
-template<typename IndexT> 
+template<typename IndexT>
 IndexT
-commonIndex(const ITensorT<IndexT>& A, 
-            const ITensorT<IndexT>& B, 
+commonIndex(const ITensorT<IndexT>& A,
+            const ITensorT<IndexT>& B,
             IndexType t)
     {
     for(auto& I : A.inds())
         if( (t == All || I.type() == t)
-         && hasindex(B.inds(),I) ) 
+         && hasindex(B.inds(),I) )
             {
             return I;
             }
@@ -39,15 +39,15 @@ commonIndex(const ITensorT<IndexT>& A,
 template Index commonIndex(const ITensorT<Index>& A, const ITensorT<Index>& B, IndexType t);
 template IQIndex commonIndex(const ITensorT<IQIndex>& A, const ITensorT<IQIndex>& B, IndexType t);
 
-template<typename IndexT> 
+template<typename IndexT>
 IndexT
-uniqueIndex(const ITensorT<IndexT>& A, 
-            const ITensorT<IndexT>& B, 
+uniqueIndex(const ITensorT<IndexT>& A,
+            const ITensorT<IndexT>& B,
             IndexType t)
     {
     for(auto& I : A.inds())
         if( (t == All || I.type() == t)
-         && !hasindex(B.inds(),I) ) 
+         && !hasindex(B.inds(),I) )
             {
             return I;
             }
@@ -58,16 +58,16 @@ template IQIndex uniqueIndex(const ITensorT<IQIndex>& A, const ITensorT<IQIndex>
 
 template<typename IndexT>
 ITensorT<IndexT>
-swapPrime(ITensorT<IndexT> T, 
-          int plev1, 
+swapPrime(ITensorT<IndexT> T,
+          int plev1,
           int plev2,
           IndexType type)
-    { 
+    {
     int tempLevel = 99999;
 #ifdef DEBUG
     for(auto& I : T.inds())
         {
-        if(I.primeLevel() == tempLevel) 
+        if(I.primeLevel() == tempLevel)
             {
             println("tempLevel = ",tempLevel);
             Error("swapPrime fails if an index has primeLevel==tempLevel");
@@ -77,7 +77,7 @@ swapPrime(ITensorT<IndexT> T,
     T.mapprime(plev1,tempLevel,type);
     T.mapprime(plev2,plev1,type);
     T.mapprime(tempLevel,plev2,type);
-    return T; 
+    return T;
     }
 template ITensorT<Index> swapPrime(ITensorT<Index>, int, int, IndexType);
 template ITensorT<IQIndex> swapPrime(ITensorT<IQIndex>, int, int, IndexType);
@@ -118,12 +118,12 @@ write(std::ostream& s, ITensorT<I> const& T)
     write(s,T.inds());
     write(s,T.scale());
     auto type = StorageType::Null;
-    if(T.store()) 
+    if(T.store())
         {
         type = doTask(StorageType{},T.store());
         }
     write(s,type);
-    if(T.store()) 
+    if(T.store())
         {
         doTask(Write{s},T.store());
         }
@@ -133,7 +133,7 @@ template void write(std::ostream& s, ITensorT<IQIndex> const& T);
 
 template<class I>
 ITensorT<I>
-multSiteOps(ITensorT<I> A, ITensorT<I> const& B) 
+multSiteOps(ITensorT<I> A, ITensorT<I> const& B)
     {
     A.prime(Site);
     A *= B;

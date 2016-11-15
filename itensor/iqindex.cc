@@ -44,29 +44,29 @@ class IQIndexDat
     IQIndexDat() { }
 
     //template<typename... Rest>
-    //IQIndexDat(Index const& i1, 
+    //IQIndexDat(Index const& i1,
     //           QN const& q1,
-    //           Rest const&... args) 
-    //    { 
+    //           Rest const&... args)
+    //    {
     //    constexpr auto size = sizeof...(args)/2+1;
     //    iq_ = stdx::reserve_vector<IndexQN>(size);
     //    detail::fill(iq_,i1,q1,args...);
     //    }
 
     explicit
-    IQIndexDat(storage const& ind_qn) 
+    IQIndexDat(storage const& ind_qn)
       : iq_(ind_qn)
         { }
 
     explicit
-    IQIndexDat(storage&& ind_qn) 
+    IQIndexDat(storage&& ind_qn)
       : iq_(std::move(ind_qn))
         { }
 
     //Disallow copying
     IQIndexDat(const IQIndexDat&) = delete;
 
-    void 
+    void
     operator=(IQIndexDat const&) = delete;
 
     storage const&
@@ -103,16 +103,16 @@ class IQIndexDat
     store() { return iq_; }
     };
 
-void 
-write(std::ostream & s, IQIndexDat const& d) 
-    { 
-    write(s,d.store()); 
+void
+write(std::ostream & s, IQIndexDat const& d)
+    {
+    write(s,d.store());
     }
 
-void 
-read(std::istream & s, IQIndexDat & d) 
-    { 
-    read(s,d.store()); 
+void
+read(std::istream & s, IQIndexDat & d)
+    {
+    read(s,d.store());
     }
 
 //
@@ -126,46 +126,46 @@ read(std::istream & s, IQIndexDat & d)
 #endif
 
 IQIndex::
-IQIndex(std::string const& name, 
-        storage && ind_qn, 
-        Arrow dir, 
-        int plev) 
+IQIndex(std::string const& name,
+        storage && ind_qn,
+        Arrow dir,
+        int plev)
   : Index(name,totalM(ind_qn),ind_qn.front().index.type(),plev),
     dir_(dir)
-    { 
+    {
     makeStorage(std::move(ind_qn));
     }
 
 //const IQIndexDat::storage& IQIndex::
-//inds() const 
-//    { 
+//inds() const
+//    {
 //    IQINDEX_CHECK_NULL
 //    return pd->inds();
 //    }
 
 IQIndex::const_iterator IQIndex::
-begin() const 
-    { 
+begin() const
+    {
     IQINDEX_CHECK_NULL
     return pd->begin();
     }
 
 IQIndex::const_iterator IQIndex::
-end() const 
-    { 
+end() const
+    {
     IQINDEX_CHECK_NULL
     return pd->end();
     }
 
 long IQIndex::
-nblock() const 
-    { 
+nblock() const
+    {
     IQINDEX_CHECK_NULL
-    return (long) pd->size(); 
+    return (long) pd->size();
     }
 
 Index IQIndex::
-index(long i) const 
+index(long i) const
     {
     IQINDEX_CHECK_NULL
 #ifdef DEBUG
@@ -180,7 +180,7 @@ index(long i) const
     }
 
 Index IQIndex::
-operator[](long i) const 
+operator[](long i) const
     {
     IQINDEX_CHECK_NULL
 #ifdef DEBUG
@@ -195,7 +195,7 @@ operator[](long i) const
     }
 
 const QN& IQIndex::
-qn(long i) const 
+qn(long i) const
     {
     IQINDEX_CHECK_NULL
 #ifdef DEBUG
@@ -211,9 +211,9 @@ qn(long i) const
 
 
 IQIndex& IQIndex::
-dag() 
-    { 
-    dir_ = -dir_; 
+dag()
+    {
+    dir_ = -dir_;
     return *this;
     }
 
@@ -243,7 +243,7 @@ showm(IQIndex const& I)
 #ifdef DEBUG
     if(!I) Error("Calling showm on null IQIndex");
 #endif
-    ostringstream oh; 
+    ostringstream oh;
     oh << "m=" << I.m() << " | ";
     for(const IndexQN& iq : I)
         {
@@ -336,19 +336,19 @@ sectorInfo(IQIndexVal const& iv)
 
 IQIndexVal::
 IQIndexVal()
-    : 
-    val(0) 
+    :
+    val(0)
     { }
 
 
 IQIndexVal::
-IQIndexVal(const IQIndex& iqindex, long val_) 
-    : 
+IQIndexVal(const IQIndex& iqindex, long val_)
+    :
     index(iqindex),
-    val(val_) 
-    { 
+    val(val_)
+    {
 #ifdef DEBUG
-    //if(val > m() || val < 1) 
+    //if(val > m() || val < 1)
     //    {
     //    Print(index);
     //    Print(val);
@@ -359,16 +359,16 @@ IQIndexVal(const IQIndex& iqindex, long val_)
 
 
 IndexQN IQIndexVal::
-indexqn() const 
-    { 
+indexqn() const
+    {
     auto is = sectorInfo(*this);
     return IndexQN(index.index(is.sector),index.qn(is.sector));
     }
 
 
 const QN& IQIndexVal::
-qn() const 
-    { 
+qn() const
+    {
     auto is = sectorInfo(*this);
     return index.qn(is.sector);
     }
@@ -380,17 +380,17 @@ operator==(IQIndexVal const& iv1, IQIndexVal const& iv2)
     }
 
 IQIndexVal::
-operator IndexVal() const 
-    { 
-    return IndexVal(Index(index),val); 
+operator IndexVal() const
+    {
+    return IndexVal(Index(index),val);
     }
 
 
 IndexVal IQIndexVal::
-blockIndexVal() const 
-    { 
+blockIndexVal() const
+    {
     auto is = sectorInfo(*this);
-    return IndexVal(index.index(is.sector),is.sind); 
+    return IndexVal(index.index(is.sector),is.sind);
     }
 
 IQIndexVal&  IQIndexVal::
@@ -426,23 +426,23 @@ dag() { index.dag(); return *this; }
 
 ITensor
 operator*(IQIndexVal const& iqiv, IndexVal const& iv)
-    { 
-    return IndexVal(Index(iqiv.index),iqiv.val) * iv; 
+    {
+    return IndexVal(Index(iqiv.index),iqiv.val) * iv;
     }
 
 /*
 
 IQIndexVal::
-operator ITensor() const 
-    { 
-    return ITensor(IndexVal(iqind,i)); 
+operator ITensor() const
+    {
+    return ITensor(IndexVal(iqind,i));
     }
 */
 
 IQIndexVal IQIndex::
-operator()(long val) const 
-    { 
-    return IQIndexVal(*this,val); 
+operator()(long val) const
+    {
+    return IQIndexVal(*this,val);
     }
 
 void IQIndex::
@@ -453,7 +453,7 @@ makeStorage(storage && iq)
 
 bool
 hasindex(IQIndex const& J, Index const& i)
-    { 
+    {
     for(auto& j : J)
         {
         if(j == i) return true;
@@ -463,7 +463,7 @@ hasindex(IQIndex const& J, Index const& i)
 
 long
 findindex(const IQIndex& J, const Index& i)
-    { 
+    {
     for(long j = 1; j <= J.nindex(); ++j)
         {
         if(J.index(j) == i) return j;
@@ -488,11 +488,11 @@ offset(const IQIndex& I, const Index& i)
 
 QN
 qn(const IQIndex& I, const Index& i)
-    { 
+    {
     for(const IndexQN& jq : I)
-        { 
-        if(jq == i) 
-            return jq.qn; 
+        {
+        if(jq == i)
+            return jq.qn;
         }
     println("I = ",I);
     println("i = ",i);
@@ -502,9 +502,9 @@ qn(const IQIndex& I, const Index& i)
 
 Index
 findByQN(const IQIndex& I, const QN& qn)
-    { 
+    {
     for(auto& iq : I)
-        { 
+        {
         if(iq.qn == qn) return Index(iq);
         }
     println("I = ",I);
@@ -513,45 +513,55 @@ findByQN(const IQIndex& I, const QN& qn)
     return Index();
     }
 
-ostream& 
+bool
+hasQN(const IQIndex& I, const QN& qn)
+    {
+    for(auto& iq : I)
+        {
+        if(iq.qn == qn) return true;
+        }
+    return false;
+    }
+
+ostream&
 operator<<(ostream &o, const IQIndex& I)
     {
-    if(!I) 
-        { 
-        o << "IQIndex: (null)"; 
+    if(!I)
+        {
+        o << "IQIndex: (null)";
         return o;
         }
     o << "IQIndex" << Index(I) << " <" << I.dir() << ">" << "\n";
-    for(long j = 1; j <= I.nindex(); ++j) 
+    for(long j = 1; j <= I.nindex(); ++j)
         o << "  " << I.index(j) << " " <<  I.qn(j) << "\n";
     return o;
     }
 
 void IndexQN::
 write(std::ostream & s) const
-    { 
-    index.write(s); 
-    itensor::write(s,qn); 
+    {
+    index.write(s);
+    itensor::write(s,qn);
     }
 
 void IndexQN::
 read(std::istream& s)
-    { 
-    index.read(s); 
-    itensor::read(s,qn); 
+    {
+    index.read(s);
+    itensor::read(s,qn);
     }
 
-std::ostream& 
+std::ostream&
 operator<<(std::ostream &s, IndexQN const& x)
-    { 
+    {
     return s << "IndexQN: " << x.index
              << " (" << x.qn << ")\n";
     }
 
-std::ostream& 
+std::ostream&
 operator<<(std::ostream& s, IQIndexVal const& iv)
-    { 
-    return s << "IQIndexVal: val = " << iv.val << " for IQIndex:\n  " << iv.index << "\n"; 
+    {
+    return s << "IQIndexVal: val = " << iv.val << " for IQIndex:\n  " << iv.index << "\n";
     }
 
 } //namespace itensor

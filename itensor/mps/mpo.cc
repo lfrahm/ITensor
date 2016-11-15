@@ -20,11 +20,11 @@ using std::string;
 
 template <class Tensor>
 MPOt<Tensor>::
-MPOt() 
-    : 
+MPOt()
+    :
     Parent(),
     logrefNorm_(DefaultLogRefScale)
-    { 
+    {
     }
 template MPOt<ITensor>::MPOt();
 template MPOt<IQTensor>::MPOt();
@@ -32,12 +32,12 @@ template MPOt<IQTensor>::MPOt();
 template <class Tensor>
 MPOt<Tensor>::
 MPOt(const SiteSet& sites,
-     Real _logrefNorm) 
-    : 
+     Real _logrefNorm)
+    :
     Parent(sites)
-    { 
-    // Norm of psi^2 = 1 = norm = sum of denmat evals. 
-    // This translates to Tr{Adag A} = norm.  
+    {
+    // Norm of psi^2 = 1 = norm = sum of denmat evals.
+    // This translates to Tr{Adag A} = norm.
     // Ref. norm is Tr{1} = d^N, d = 2 S=1/2, d = 4 for Hubbard, etc
     if(_logrefNorm == DefaultLogRefScale) logrefNorm_ = sites.N();
 
@@ -56,7 +56,7 @@ MPOt<IQTensor>::
 MPOt(const SiteSet& sites, Real _logrefNorm);
 
 /*
-template<class Tensor> 
+template<class Tensor>
 void MPOt<Tensor>::
 position(int i, const Args& args)
     {
@@ -132,11 +132,11 @@ plusEq(const MPOt<Tensor>& other_,
     //cout << "calling new orthog in sum" << endl;
     if(!itensor::isOrtho(*this))
         {
-        try { 
-            orthogonalize(); 
+        try {
+            orthogonalize();
             }
-        catch(const ResultIsZero& rz) 
-            { 
+        catch(const ResultIsZero& rz)
+            {
             *this = other_;
             return *this;
             }
@@ -145,11 +145,11 @@ plusEq(const MPOt<Tensor>& other_,
     if(!itensor::isOrtho(other_))
         {
         auto other = other_;
-        try { 
-            other.orthogonalize(); 
+        try {
+            other.orthogonalize();
             }
-        catch(const ResultIsZero& rz) 
-            { 
+        catch(const ResultIsZero& rz)
+            {
             return *this;
             }
         return addAssumeOrth(*this,other,args);
@@ -162,10 +162,10 @@ MPOt<ITensor>& MPOt<ITensor>::plusEq(const MPOt<ITensor>& other, const Args&);
 template
 MPOt<IQTensor>& MPOt<IQTensor>::plusEq(const MPOt<IQTensor>& other, const Args&);
 
-int 
+int
 findCenter(const IQMPO& psi)
     {
-    for(int j = 1; j <= psi.N(); ++j) 
+    for(int j = 1; j <= psi.N(); ++j)
         {
         const IQTensor& A = psi.A(j);
         if(A.r() == 0) Error("Zero rank tensor in IQMPO");
@@ -200,10 +200,9 @@ checkQNs(const IQMPO& H)
         {
         Error("Did not find an ortho. center");
         }
-
     //Check that all IQTensors have zero div
     //including the ortho. center
-    for(int i = 1; i <= N; ++i) 
+    for(int i = 1; i <= N; ++i)
         {
         if(!H.A(i))
             {
@@ -221,14 +220,14 @@ checkQNs(const IQMPO& H)
     //Check arrows from left edge
     for(int i = 1; i < center; ++i)
         {
-        if(rightLinkInd(H,i).dir() != In) 
+        if(rightLinkInd(H,i).dir() != In)
             {
             println("checkQNs: At site ",i," to the left of the OC, Right side Link not pointing In");
             Error("Incorrect Arrow in IQMPO");
             }
         if(i > 1)
             {
-            if(leftLinkInd(H,i).dir() != Out) 
+            if(leftLinkInd(H,i).dir() != Out)
                 {
                 println("checkQNs: At site ",i," to the left of the OC, Left side Link not pointing Out");
                 Error("Incorrect Arrow in IQMPO");
@@ -240,12 +239,12 @@ checkQNs(const IQMPO& H)
     for(int i = N; i > center; --i)
         {
         if(i < N)
-        if(rightLinkInd(H,i).dir() != Out) 
+        if(rightLinkInd(H,i).dir() != Out)
             {
             println("checkQNs: At site ",i," to the right of the OC, Right side Link not pointing Out");
             Error("Incorrect Arrow in IQMPO");
             }
-        if(leftLinkInd(H,i).dir() != In) 
+        if(leftLinkInd(H,i).dir() != In)
             {
             println("checkQNs: At site ",i," to the right of the OC, Left side Link not pointing In");
             Error("Incorrect Arrow in IQMPO");
@@ -256,7 +255,7 @@ checkQNs(const IQMPO& H)
 
 
 template <class Tensor>
-std::ostream& 
+std::ostream&
 operator<<(std::ostream& s, MPOt<Tensor> const& M)
     {
     s << "\n";
@@ -264,10 +263,10 @@ operator<<(std::ostream& s, MPOt<Tensor> const& M)
     return s;
     }
 template
-std::ostream& 
+std::ostream&
 operator<<(std::ostream& s, MPOt<ITensor> const& M);
 template
-std::ostream& 
+std::ostream&
 operator<<(std::ostream& s, MPOt<IQTensor> const& M);
 
 void
@@ -299,7 +298,7 @@ putMPOLinks(IQMPO& W, Args const& args)
     for(int b = 1; b < N; ++b)
         {
         string nm = format("%s%d",pfix,b);
-               
+
         q += div(W.A(b));
         links.at(b) = IQIndex(nm,Index(nm),q);
         }
@@ -328,27 +327,27 @@ template bool isComplex(MPOt<IQTensor> const& W);
 
 //<psi|H|phi>
 template <class Tensor>
-void 
-overlap(MPSt<Tensor> const& psi, 
-        MPOt<Tensor> const& H, 
-        MPSt<Tensor> const& phi, 
-        Real& re, 
+void
+overlap(MPSt<Tensor> const& psi,
+        MPOt<Tensor> const& H,
+        MPSt<Tensor> const& phi,
+        Real& re,
         Real& im)
     {
     auto N = H.N();
     if(phi.N() != N || psi.N() != N) Error("psiHphi: mismatched N");
 
-    auto L = phi.A(1); 
+    auto L = phi.A(1);
     //Some Hamiltonians may store edge tensors in H.A(0) and H.A(N+1)
     L *= (H.A(0) ? H.A(0)*H.A(1) : H.A(1));
     L *= dag(prime(psi.A(1)));
-    for(int i = 2; i < N; ++i) 
-        { 
-        L *= phi.A(i); 
-        L *= H.A(i); 
-        L *= dag(prime(psi.A(i))); 
+    for(int i = 2; i < N; ++i)
+        {
+        L *= phi.A(i);
+        L *= H.A(i);
+        L *= dag(prime(psi.A(i)));
         }
-    L *= phi.A(N); 
+    L *= phi.A(N);
     L *= H.A(N);
     if(H.A(N+1)) L *= H.A(N+1);
 
@@ -362,9 +361,9 @@ template
 void overlap(MPSt<IQTensor> const& psi, MPOt<IQTensor> const& H, MPSt<IQTensor> const& phi, Real& re, Real& im);
 
 template <class Tensor>
-Real 
-overlap(MPSt<Tensor> const& psi, 
-        MPOt<Tensor> const& H, 
+Real
+overlap(MPSt<Tensor> const& psi,
+        MPOt<Tensor> const& H,
         MPSt<Tensor> const& phi) //Re[<psi|H|phi>]
     {
     Real re, im;
@@ -380,9 +379,9 @@ Real overlap(MPSt<IQTensor> const& psi, MPOt<IQTensor> const& H, MPSt<IQTensor> 
 
 
 template <class Tensor>
-Cplx 
-overlapC(MPSt<Tensor> const& psi, 
-         MPOt<Tensor> const& H, 
+Cplx
+overlapC(MPSt<Tensor> const& psi,
+         MPOt<Tensor> const& H,
          MPSt<Tensor> const& phi) //Re[<psi|H|phi>]
     {
     Real re, im;
@@ -396,25 +395,25 @@ Cplx overlapC(MPSt<IQTensor> const& psi, MPOt<IQTensor> const& H, MPSt<IQTensor>
 
 template<class Tensor>
 void
-overlap(MPSt<Tensor> const& psi, 
-        MPOt<Tensor> const& H, 
-        Tensor const& LB, 
-        Tensor const& RB, 
-        MPSt<Tensor> const& phi, 
-        Real& re, 
+overlap(MPSt<Tensor> const& psi,
+        MPOt<Tensor> const& H,
+        Tensor const& LB,
+        Tensor const& RB,
+        MPSt<Tensor> const& phi,
+        Real& re,
         Real& im) //<psi|H|phi>
     {
     auto N = psi.N();
     if(N != phi.N() || H.N() < N) Error("mismatched N in psiHphi");
 
     auto L = (LB ? LB*phi.A(1) : phi.A(1));
-    L *= H.A(1); 
+    L *= H.A(1);
     L *= dag(prime(psi.A(1)));
     for(int i = 2; i <= N; ++i)
-        { 
-        L *= phi.A(i); 
-        L *= H.A(i); 
-        L *= dag(prime(psi.A(i))); 
+        {
+        L *= phi.A(i);
+        L *= H.A(i);
+        L *= dag(prime(psi.A(i)));
         }
 
     if(RB) L *= RB;
@@ -424,21 +423,21 @@ overlap(MPSt<Tensor> const& psi,
     im = z.imag();
     }
 template void
-overlap(MPSt<ITensor> const& psi, MPOt<ITensor> const& H, ITensor const& LB, 
+overlap(MPSt<ITensor> const& psi, MPOt<ITensor> const& H, ITensor const& LB,
         ITensor const& RB, MPSt<ITensor> const& phi, Real& re, Real& im);
 template void
-overlap(MPSt<IQTensor> const& psi, MPOt<IQTensor> const& H, IQTensor const& LB, 
+overlap(MPSt<IQTensor> const& psi, MPOt<IQTensor> const& H, IQTensor const& LB,
         IQTensor const& RB, MPSt<IQTensor> const& phi, Real& re, Real& im);
 
 template <class Tensor>
 Real
-overlap(MPSt<Tensor> const& psi, 
-        MPOt<Tensor> const& H, 
-        Tensor const& LB, 
-        Tensor const& RB, 
+overlap(MPSt<Tensor> const& psi,
+        MPOt<Tensor> const& H,
+        Tensor const& LB,
+        Tensor const& RB,
         MPSt<Tensor> const& phi) //Re[<psi|H|phi>]
     {
-    Real re,im; 
+    Real re,im;
     overlap(psi,H,LB,RB,phi,re,im);
     if(std::fabs(im) > 1.0e-12 * std::fabs(re))
         printfln("Real psiHphi: WARNING, dropping non-zero imaginary part (=%.5E) of expectation value.",im);
@@ -451,11 +450,11 @@ overlap(MPSt<IQTensor> const& psi, MPOt<IQTensor> const& H, IQTensor const& LB, 
 
 template <class Tensor>
 void
-overlap(MPSt<Tensor> const& psi, 
-        MPOt<Tensor> const& H, 
+overlap(MPSt<Tensor> const& psi,
+        MPOt<Tensor> const& H,
         MPOt<Tensor> const& K,
-        MPSt<Tensor> const& phi, 
-        Real& re, 
+        MPSt<Tensor> const& phi,
+        Real& re,
         Real& im) //<psi|H K|phi>
     {
     if(psi.N() != phi.N() || psi.N() != H.N() || psi.N() != K.N()) Error("Mismatched N in psiHKphi");
@@ -490,8 +489,8 @@ void overlap(MPSt<IQTensor> const& psi, MPOt<IQTensor> const& H, MPOt<IQTensor> 
 
 template <class Tensor>
 Real
-overlap(MPSt<Tensor> const& psi, 
-         MPOt<Tensor> const& H, 
+overlap(MPSt<Tensor> const& psi,
+         MPOt<Tensor> const& H,
          MPOt<Tensor> const& K,
          MPSt<Tensor> const& phi) //<psi|H K|phi>
     {
@@ -508,8 +507,8 @@ overlap(MPSt<IQTensor> const& psi, MPOt<IQTensor> const& H, MPOt<IQTensor> const
 
 template <class Tensor>
 Cplx
-overlapC(MPSt<Tensor> const& psi, 
-          MPOt<Tensor> const& H, 
+overlapC(MPSt<Tensor> const& psi,
+          MPOt<Tensor> const& H,
           MPOt<Tensor> const& K,
           MPSt<Tensor> const& phi) //<psi|H K|phi>
     {
