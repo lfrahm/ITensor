@@ -97,7 +97,7 @@ class ITensorT
 
 	//simple comparison via |C|=|A-B|< threshhold => equal
 	//will return whether ITensor A is equal to ITensor B
-	bool equals(ITensorT B, Real threshhold=pow(10,-10)){
+	bool equals(ITensorT &B, Real threshhold=pow(10,-10)){
 		bool q = this->store();
 		bool w = B.store();
 		if(!q || !w) return false;
@@ -119,7 +119,7 @@ class ITensorT
 	//comparison, the Real threshhold is the smallest difference between the tensor a and tensor b at any index for which A.equals_rec(B) will return false
 	//|A_{i,j,k,...}|-|B_{i,j,k...}|> threshhold => equals will return false
 
-	bool equals_rec(ITensorT B, Real threshhold = pow(10,-10)){
+	bool equals_rec(ITensorT &B, Real threshhold = pow(10,-10)){
 		bool q = this->store();
 		bool w = B.store();
 		if(!q || !w) return false;
