@@ -621,12 +621,12 @@ toMPOImpl(ChmstryMPO const& am, Args const& args)
             T.Anc(1) = I.coef * T.A(1);
 
             if (first)
-                {
-                H = T;
-                first = false;
-                }
+            {
+              H = T;
+              first = false;
+            }
             else
-                H.plusEq(T, args);
+              H.plusEq(T, args);
             }
         }
 
@@ -637,8 +637,6 @@ toMPOImpl(ChmstryMPO const& am, Args const& args)
             {
             for (auto sP: sigma)
                 {
-                std::cout << "\r                        ";
-                std::cout << "\r" << 100.0 * (double) count++ / (4.0 * (double) am.twoBodyTerms().size()) << "%%";
                 if ((I.i == I.k && s == sP) || (I.l == I.j && s == sP))
                     continue;
 
@@ -685,14 +683,6 @@ toMPOImpl(ChmstryMPO const& am, Args const& args)
                     }
                 putMPOLinks(T);
                 T.Anc(1) = 0.5 * I.coef * T.A(1);
-                //
-                // if (first)
-                // {
-                //   H = T;
-                //   first = false;
-                // }
-                // else
-                //   H.plusEq(T, args);
 
                 H.plusEq(T, args);
                 }
@@ -1004,7 +994,6 @@ operator<<(std::ostream& s, const ChmstryMPO& a)
     s << "Two body integrals:\n";
     for(const auto& t : a.twoBodyTerms()) s << t;
     s << "Is hermitian: " << isHermitian(a.oneBodyTerms(), a.twoBodyTerms()) << "\n";
-    s << "Number of two body terms: " << a.twoBodyTerms().size() << "\n";
     return s;
     }
 

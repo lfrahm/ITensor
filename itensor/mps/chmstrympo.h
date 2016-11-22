@@ -27,7 +27,7 @@ toMPO(ChmstryMPO const& a,
 // // returns an IQMPO which approximates exp(-tau*H)
 // //
 // // Although the tau argument is of Complex type, passing a Real
-// // tau (Real is auto convertible to Complex) will
+// // tau (Real is auto convertible to Complex) will 
 // // result in a real-valued MPO.
 // //
 // // Arguments recognized:
@@ -48,7 +48,7 @@ template<> MPO toMPO<ITensor>(const ChmstryMPO& a, const Args& args);
 template<> IQMPO toMPO<IQTensor>(const ChmstryMPO& a, const Args& args);
 // template<> MPO toExpH<ITensor>(const AutoMPO& a, Complex tau, const Args& args);
 // template<> IQMPO toExpH<IQTensor>(const AutoMPO& a, Complex tau, const Args& args);
-
+ 
 struct OneBodyInt
     {
     int i;
@@ -67,7 +67,7 @@ struct OneBodyInt
     bool
     operator!=(const OneBodyInt& other) const { return !operator==(other); }
 
-    bool
+    bool 
     operator<(const OneBodyInt& other) const { return (i < other.i || (i == other.i && j < other.j)); }
 
     bool
@@ -100,11 +100,11 @@ struct TwoBodyInt
     bool
     operator!=(const TwoBodyInt& other) const { return !operator==(other); }
 
-    bool
+    bool 
     operator<(const TwoBodyInt& other) const { return (i < other.i ||
-                                                      (i == other.i && j < other.j) ||
+                                                      (i == other.i && j < other.j) || 
                                                       (i == other.i && j == other.j && k < other.k)  ||
-                                                      (i == other.i && j == other.j && k == other.k && l < other.l));
+                                                      (i == other.i && j == other.j && k == other.k && l < other.l)); 
                                                  }
 
     bool
@@ -126,7 +126,7 @@ class ChmstryMPO
 
     public:
 
-    ChmstryMPO(SiteSet const& sites)
+    ChmstryMPO(SiteSet const& sites) 
       : sites_(sites)
         { }
 
@@ -144,21 +144,21 @@ class ChmstryMPO
     operator IQMPO() const { return toMPO<IQTensor>(*this); }
 
     void
-    add(OneBodyInt t)
-        {
-        if(abs(t.coef) > 0)
+    add(OneBodyInt t) 
+        { 
+        if(abs(t.coef) > 1E-12) 
             {
-            oneBodyTerms_.push_back(t);
+            oneBodyTerms_.push_back(t); 
             std::sort(oneBodyTerms_.begin(), oneBodyTerms_.end());
             }
         }
 
     void
-    add(TwoBodyInt t)
-        {
-        if(abs(t.coef) > 0)
+    add(TwoBodyInt t) 
+        { 
+        if(abs(t.coef) > 1E-12) 
             {
-            twoBodyTerms_.push_back(t);
+            twoBodyTerms_.push_back(t); 
             std::sort(twoBodyTerms_.begin(), twoBodyTerms_.end());
             }
         }
@@ -168,13 +168,13 @@ class ChmstryMPO
 
     };
 
-std::ostream&
+std::ostream& 
 operator<<(std::ostream& s, const OneBodyInt& a);
 
-std::ostream&
+std::ostream& 
 operator<<(std::ostream& s, const TwoBodyInt& a);
 
-std::ostream&
+std::ostream& 
 operator<<(std::ostream& s, const ChmstryMPO& a);
 
 }
