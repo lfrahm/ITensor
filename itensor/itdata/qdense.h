@@ -225,10 +225,9 @@ doTask(GenerateIT<F,Cplx>& G, QDenseCplx & D)
     }
 
 
+template<typename T>
 Cplx
-doTask(GetElt<IQIndex>& G, QDenseReal const& d);
-Cplx
-doTask(GetElt<IQIndex>& G, QDenseCplx const& d);
+doTask(GetElt<IQIndex>& G, QDense<T> const& d);
 
 template<typename T>
 void

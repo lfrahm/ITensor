@@ -368,10 +368,8 @@ overlap(MPSt<Tensor> const& psi,
     {
     Real re, im;
     overlap(psi,H,phi,re,im);
-    if(std::fabs(im) > 1E-5 * std::fabs(re) || std::fabs(im) > 1E-9)
-        {
+    if(std::fabs(im) > 1.0e-12 * std::fabs(re))
         printfln("\nReal psiHphi: WARNING, dropping non-zero (=%.5E) imaginary part of expectation value.",im);
-        }
     return re;
     }
 template

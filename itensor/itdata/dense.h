@@ -198,10 +198,9 @@ doTask(GenerateIT<F,Cplx>& G, Dense<Cplx> & D)
     }
 
 
+template<typename T>
 Cplx 
-doTask(GetElt<Index> const& g, DenseReal const& d);
-Cplx 
-doTask(GetElt<Index> const& g, DenseCplx const& d);
+doTask(GetElt<Index> const& g, Dense<T> const& d);
 
 template<typename E, typename T>
 void
