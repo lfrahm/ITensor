@@ -685,10 +685,19 @@ toMPOImpl(ChmstryMPO const& am, Args const& args)
         }
 
     int count = 0;
+    clock_t time = clock();
     for (auto I: am.twoBodyTerms())
         {
         MPOt<Tensor> V;
-        std::cout << 100 * (double) count++ / ((double) am.twoBodyTerms().size()) << std::endl;
+
+        if (count++ % 10 == 0)
+            {
+            time = clock() - time;
+            double prog = 100.0 * (double) count / ((double) am.twoBodyTerms().size());
+            double deltaT = 10.0 * ((double) CLOCKS_PER_SEC) / ((double) time);
+            printf("### %.2f%% %.5f Ints/s                               \r", prog, deltaT);    
+            } 
+
         for (auto s: sigma)
             {
             for (auto sP: sigma)
@@ -785,7 +794,7 @@ toMPOImpl(ChmstryMPO const& am, Args const& args)
                 }
             }
         }
-    std::cout << std::endl;
+    printf("### done                               \n");
     return H;
     }
 
