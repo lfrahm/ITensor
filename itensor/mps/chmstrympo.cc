@@ -576,6 +576,61 @@ multFourOps(string a, string b, string c, string d, int i, SiteSet const& sites)
     return (prime((prime((prime(sites.op(a, i),Site)*sites.op(b, i)).mapprime(2,1,Site),Site)*sites.op(c, i)).mapprime(2,1,Site),Site)*sites.op(d, i)).mapprime(2,1,Site);
     }
 
+
+template <typename Tensor>
+bool
+createAddend(int Ii, int Ij, int Ik, int Il, string s, string sP, Cplx coef, SiteSet const& sites, MPOt<Tensor>& out)
+    {
+    int N = sites.N();
+
+    if ((Ii == Ik && s == sP) || (Il == Ij && s == sP))
+        return false;
+
+    std::vector<string> sI;
+    std::vector<string> sJ;
+    std::vector<string> sK;
+    std::vector<string> sL;
+
+    // i
+    {
+    for (int i = 1; i < Ii; ++i) { sI.push_back("F"); }
+    sI.push_back("Cdag"+s);
+    for (int i = Ii+1; i <= N; ++i) { sI.push_back("Id"); }
+    }
+    // k
+    {
+    for (int i = 1; i < Ik; ++i) { sK.push_back("F"); }
+    sK.push_back("Cdag"+sP);
+    for (int i = Ik+1; i <= N; ++i) { sK.push_back("Id"); }
+    }
+    // l
+    {
+    for (int i = 1; i < Il; ++i) { sL.push_back("F"); }
+    sL.push_back("C"+sP);
+    for (int i = Il+1; i <= N; ++i) { sL.push_back("Id"); }
+    }
+    // j
+    {
+    for (int i = 1; i < Ij; ++i) { sJ.push_back("F"); }
+    sJ.push_back("C"+s);
+    for (int i = Ij+1; i <= N; ++i) { sJ.push_back("Id"); }
+    }
+
+    // assert(sI.size() == N);
+    assert(sI.size() == sJ.size());
+    assert(sI.size() == sK.size());
+    assert(sI.size() == sL.size());
+
+    out = MPOt<Tensor>(sites);
+    for (int i = 1; i <= N; i++)
+        {
+        out.Anc(i) = multFourOps<Tensor>(sI[i-1], sK[i-1], sL[i-1], sJ[i-1], i, sites);
+        }
+    putMPOLinks(out);
+    out.Anc(1) = 0.5 * coef * out.A(1);
+    return true;
+    }
+
 template<typename Tensor>
 MPOt<Tensor>
 toMPOImpl(ChmstryMPO const& am, Args const& args)
@@ -637,64 +692,55 @@ toMPOImpl(ChmstryMPO const& am, Args const& args)
             {
             for (auto sP: sigma)
                 {
-                std::cout << "\r                        ";
-                std::cout << "\r" << 100.0 * (double) count++ / (4.0 * (double) am.twoBodyTerms().size()) << "%%";
-                if ((I.i == I.k && s == sP) || (I.l == I.j && s == sP))
-                    continue;
+                std::cout << 100 * (double) count++ / (4.0 * (double) am.twoBodyTerms().size()) << std::endl;
 
-                std::vector<string> sI;
-                std::vector<string> sJ;
-                std::vector<string> sK;
-                std::vector<string> sL;
-
-                // i
-                {
-                for (int i = 1; i < I.i; ++i) { sI.push_back("F"); }
-                sI.push_back("Cdag"+s);
-                for (int i = I.i+1; i <= N; ++i) { sI.push_back("Id"); }
-                }
-                // k
-                {
-                for (int i = 1; i < I.k; ++i) { sK.push_back("F"); }
-                sK.push_back("Cdag"+sP);
-                for (int i = I.k+1; i <= N; ++i) { sK.push_back("Id"); }
-                }
-                // l
-                {
-                for (int i = 1; i < I.l; ++i) { sL.push_back("F"); }
-                sL.push_back("C"+sP);
-                for (int i = I.l+1; i <= N; ++i) { sL.push_back("Id"); }
-                }
-                // j
-                {
-                for (int i = 1; i < I.j; ++i) { sJ.push_back("F"); }
-                sJ.push_back("C"+s);
-                for (int i = I.j+1; i <= N; ++i) { sJ.push_back("Id"); }
-                }
-
-                // assert(sI.size() == N);
-                assert(sI.size() == sJ.size());
-                assert(sI.size() == sK.size());
-                assert(sI.size() == sL.size());
-
-                // std::cout << sI.size() << std::endl;
-                auto T = MPOt<Tensor>(sites);
-                for (int i = 1; i <= N; i++)
+                if (first)
                     {
-                    T.Anc(i) = multFourOps<Tensor>(sI[i-1], sK[i-1], sL[i-1], sJ[i-1], i, sites);
+                    abort();
+                    MPOt<Tensor> T;
+                    H = T;
+                    first = false;
                     }
-                putMPOLinks(T);
-                T.Anc(1) = 0.5 * I.coef * T.A(1);
-                //
-                // if (first)
-                // {
-                //   H = T;
-                //   first = false;
-                // }
-                // else
-                //   H.plusEq(T, args);
+                else
+                    {
 
-                H.plusEq(T, args);
+                    MPOt<Tensor> T;
+                    if (createAddend<Tensor>(I.i, I.j, I.k, I.l, s, sP, I.coef, sites, T))
+                        H.plusEq(T, args);
+
+                    if (I.k != I.l)
+                        if (createAddend<Tensor>(I.i, I.j, I.l, I.k, s, sP, I.coef, sites, T))
+                            H.plusEq(T, args);
+
+                    if (I.i != I.j)
+                        if (createAddend<Tensor>(I.j, I.i, I.k, I.l, s, sP, I.coef, sites, T))
+                            H.plusEq(T, args);
+
+                    if (I.i != I.j && I.k != I.l)
+                        if (createAddend<Tensor>(I.j, I.i, I.l, I.k, s, sP, I.coef, sites, T))
+                            H.plusEq(T, args);
+
+                    if ((I.i != I.k || I.j != I.l) && (I.i != I.l || I.j != I.k))
+                        {
+                        if (createAddend<Tensor>(I.k, I.l, I.i, I.j, s, sP, I.coef, sites, T))
+                            H.plusEq(T, args);
+
+                        if (I.i != I.j)
+                            if (createAddend<Tensor>(I.k, I.l, I.j, I.i, s, sP, I.coef, sites, T))
+                                H.plusEq(T, args);
+
+                        if (I.k != I.l)
+                            if (createAddend<Tensor>(I.l, I.k, I.i, I.j, s, sP, I.coef, sites, T))
+                                H.plusEq(T, args);
+
+                        if (I.i != I.j && I.k != I.l)
+                            if (createAddend<Tensor>(I.l, I.k, I.j, I.i, s, sP, I.coef, sites, T))
+                                H.plusEq(T, args);
+
+                        }
+
+                    }
+
                 }
             }
         }
