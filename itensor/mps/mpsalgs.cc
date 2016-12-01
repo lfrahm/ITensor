@@ -257,27 +257,33 @@ plussers(IQIndex const& l1, IQIndex const& l2,
     sumind = IQIndex(sumind.rawname(),std::move(iq),sumind.dir(),sumind.primeLevel());
 
     assert(sumind.m() == l1.m() + l2.m());
+    
     first = IQTensor(dag(l1), sumind);
-    int count = 1;
-    for (int i = 1; i <= sumind.m(); i++)
+
+    for(IndexQN const& x : l1)
         {
-        if (map[i-1] == l1)
-            {
-            first.set(l1(count), sumind(i), 1.0);
-            count++;
-            }
+        Index y = findByQN(sumind, x.qn);
+        int offsetSum = offset(sumind, y);
+        int offsetL = offset(l1, x.index);
+
+        for (int i = 1; i <= x.m(); i++) 
+            first.set(l1(offsetL + i), sumind(offsetSum + i), 1.0);
+
         }
 
     second = IQTensor(dag(l2), sumind);
-    count = 1;
-    for (int i = 1; i <= sumind.m(); i++)
+    for(IndexQN const& x : l2)
         {
-        if (map[i-1] == l2)
-            {
-            second.set(l2(count), sumind(i), 1.0);
-            count++;
-            }
+        Index y = findByQN(sumind, x.qn);
+        int offsetSum = offset(sumind, y);
+        int offsetR = offset(l2, x.index);
+
+        int div = y.m() - x.m();
+        for (int i = 1; i <= x.m(); i++) 
+                second.set(l2(offsetR + i), sumind(offsetSum + i + div), 1.0);        
+
         }
+
     if (l1.dir() != l2.dir())
         {
         PrintData(first);
@@ -316,9 +322,6 @@ addAssumeOrth(MPSType      & L,
         auto r = l1;
         plussers(l1,l2,r,first[i],second[i]);
         }
-
-    // PrintData(L.A(1) * first[1]);
-    // PrintData(R.A(1) * second[1]);
 
     L.Anc(1) = L.A(1) * first[1] + R.A(1) * second[1];
     for(auto i : range1(2,N-1))
