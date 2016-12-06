@@ -686,16 +686,20 @@ toMPOImpl(ChmstryMPO const& am, Args const& args)
 
     int count = 0;
     clock_t time = clock();
+    vector<MPOt<Tensor>> vn;
+    vn.push_back(MPOt<Tensor>());
+    Real maxm = args.getReal("Maxm", 100);
     for (auto I: am.twoBodyTerms())
         {
+	
         MPOt<Tensor> V;
-
-        if (count++ % 10 == 0)
+        
+        if (count++ % 1 == 0)
             {
             time = clock() - time;
             double prog = 100.0 * (double) count / ((double) am.twoBodyTerms().size());
-            double deltaT = 10.0 * ((double) CLOCKS_PER_SEC) / ((double) time);
-            printf("### %.2f%% %.5f Ints/s                               \r", prog, deltaT);    
+            double deltaT = 1.0 * ((double) CLOCKS_PER_SEC) / ((double) time);
+            printf("### %.2f%% %.5f Ints/s                               \n", prog, deltaT);    
             } 
 
         for (auto s: sigma)
@@ -779,21 +783,37 @@ toMPOImpl(ChmstryMPO const& am, Args const& args)
 
                 }
             }
-        if (H)
-            {
-            if (V)
-                {
-                H.plusEq(V);
-                }
-            } 
-        else
-            {
-            if(V)
-                {
-                H = V;    
-                }
-            }
-        }
+
+	if(vn.back()){
+		if(V){
+			vn.back().plusEq(V, args);
+		}
+	}else{
+		if(V){
+			vn.back()=V;
+		}
+	}
+	if(vn.back()){
+		if(maxM(vn.back())>0.2*maxm){
+			vn.push_back(MPOt<Tensor>());
+		}
+	}
+   }
+
+	std::cout << vn.size() << std::endl;
+   for (int i = 0; i <= vn.size()-1; i++)
+   {
+	if(i==0){
+		if(!H){ 
+			H=vn[0];
+		}else{ 
+			H.plusEq(vn[0], args);
+		}
+	}else{
+		H.plusEq(vn[i], args);
+	}
+   }
+
     printf("### done                               \n");
     return H;
     }
@@ -1106,3 +1126,4 @@ operator<<(std::ostream& s, const ChmstryMPO& a)
 
 
 }
+
