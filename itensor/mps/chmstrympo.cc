@@ -711,79 +711,13 @@ toMPOImpl(ChmstryMPO const& am, Args const& args)
                     else
                         V = T;
                     }
-
-                if (I.k != I.l)
-                    if (createAddend<Tensor>(I.i, I.j, I.l, I.k, s, sP, I.coef, sites, T))
-                        {
-                        if (V)
-                            V.plusEq(T, args);
-                        else
-                            V = T;
-                        }
-                    
-                if (I.i != I.j)
-                    if (createAddend<Tensor>(I.j, I.i, I.k, I.l, s, sP, I.coef, sites, T))
-                        {
-                        if (V)
-                            V.plusEq(T, args);
-                        else
-                            V = T;
-                        }
-
-                if (I.i != I.j && I.k != I.l)
-                    if (createAddend<Tensor>(I.j, I.i, I.l, I.k, s, sP, I.coef, sites, T))
-                        {
-                        if (V)
-                            V.plusEq(T, args);
-                        else
-                            V = T;
-                        }   
-
-                if ((I.i != I.k || I.j != I.l) && (I.i != I.l || I.j != I.k))
-                    {
-                    if (createAddend<Tensor>(I.k, I.l, I.i, I.j, s, sP, I.coef, sites, T))
-                        {
-                        if (V)
-                            V.plusEq(T, args);
-                        else
-                            V = T;
-                        }
-                    if (I.i != I.j)
-                        if (createAddend<Tensor>(I.k, I.l, I.j, I.i, s, sP, I.coef, sites, T))
-                            {
-                            if (V)
-                                V.plusEq(T, args);
-                            else
-                                V = T;
-                            }
-
-                    if (I.k != I.l)
-                        if (createAddend<Tensor>(I.l, I.k, I.i, I.j, s, sP, I.coef, sites, T))
-                            {
-                            if (V)
-                                V.plusEq(T, args);
-                            else
-                                V = T;
-                            }
-
-                    if (I.i != I.j && I.k != I.l)
-                        if (createAddend<Tensor>(I.l, I.k, I.j, I.i, s, sP, I.coef, sites, T))
-                            {
-                            if (V)
-                                V.plusEq(T, args);
-                            else
-                                V = T;
-                            }
-
-                    }
-
                 }
             }
         if (H)
             {
             if (V)
                 {
-                H.plusEq(V);
+                H.plusEq(V, args);
                 }
             } 
         else
