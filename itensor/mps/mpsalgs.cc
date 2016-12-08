@@ -284,11 +284,6 @@ plussers(IQIndex const& l1, IQIndex const& l2,
 
         }
 
-    if (l1.dir() != l2.dir())
-        {
-        PrintData(first);
-        PrintData(second);
-        }
     }
 
 
