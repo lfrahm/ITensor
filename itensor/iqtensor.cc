@@ -341,7 +341,8 @@ combiner(std::vector<IQIndex> cinds,
     auto cname = args.getString("IndexName","cmb");
     auto itype = getIndexType(args,"IndexType",cinds.front().type());
     auto cr = cinds.size();
-    auto cdir = cinds.front().dir();
+    auto dirStr = args.getString("Dir","In");
+    auto cdir = (dirStr == "In") ? In : Out;
 
     auto C = QCombiner{cinds};
 

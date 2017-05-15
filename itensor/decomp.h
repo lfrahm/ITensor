@@ -208,12 +208,12 @@ svd(Tensor AA,
            Vcomb;
     if(!Uinds.empty())
         {
-        Ucomb = combiner(std::move(Uinds),{"IndexName","uc"});
+        Ucomb = combiner(std::move(Uinds),{"IndexName","uc", "Dir", "In"});
         AA *= Ucomb;
         }
     if(!Vinds.empty())
         {
-        Vcomb = combiner(std::move(Vinds),{"IndexName","vc"});
+        Vcomb = combiner(std::move(Vinds),{"IndexName","vc", "Dir", "Out"});
         AA *= Vcomb;
         }
 
